@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wood Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #181c27;
+    --bg3: #1e2436;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #f0f2f8;
+    --text2: #8b92a8;
+    --text3: #555d75;
+    --accent: #2ecc71;
+    --red: #e74c3c;
+    --mode-accent: #2ecc71;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+  .app-header { background: var(--bg2); border-bottom: 1px solid var(--border2); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; gap: 12px; }
+  .app-logo { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .logo-icon { width: 36px; height: 36px; background: var(--mode-accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #0f1117; letter-spacing: 1px; }
+  .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--text); }
+  .logo-text span { color: var(--mode-accent); }
+  .header-tabs { display: flex; gap: 4px; }
+  .htab { padding: 8px 20px; border-radius: 8px; border: none; background: transparent; color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .htab:hover { background: var(--bg3); color: var(--text); }
+  .htab.active { background: var(--mode-accent); color: #0f1117; }
+  .app-body { flex: 1; }
+  .main { flex: 1; padding: 2rem 2rem 4rem; max-width: 900px; margin: 0 auto; width: 100%; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .section-heading { display: flex; align-items: baseline; gap: 10px; margin-bottom: 1.5rem; }
+  .section-heading h2 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--text); }
+  .section-heading p { font-size: 13px; color: var(--text3); }
+  .max-row { display: flex; gap: 12px; margin-bottom: 2rem; }
+  .max-card { flex: 1; background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 4px; }
+  .max-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); }
+  .max-card-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--mode-accent); }
+  .input-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .input-card-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 1.25rem; }
+  .input-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--text2); font-weight: 500; }
+  .field input { height: 44px; padding: 0 14px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; transition: border-color .2s; outline: none; }
+  .field input:focus { border-color: var(--mode-accent); }
+  .field input[type=date] { width: 170px; color-scheme: dark; }
+  .field input[type=number] { width: 110px; }
+  .fg-group { display: flex; align-items: flex-end; }
+  .fg-group .field:first-child input { border-radius: 10px 0 0 10px; border-right: none; }
+  .fg-group .field:last-child input { border-radius: 0 10px 10px 0; }
+  .btn-primary { height: 44px; padding: 0 24px; background: var(--mode-accent); border: none; border-radius: 10px; color: #0f1117; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-primary:active { transform: scale(.97); }
+  .btn-secondary { height: 44px; padding: 0 20px; background: transparent; border: 1px solid var(--border2); border-radius: 10px; color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .btn-secondary:hover { border-color: var(--mode-accent); color: var(--mode-accent); }
+  .entries-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 2rem; max-height: 280px; overflow-y: auto; padding-right: 4px; }
+  .entries-wrap::-webkit-scrollbar { width: 4px; }
+  .entries-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+  .entry-row { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; display: grid; grid-template-columns: 140px 1fr 1fr auto; align-items: center; gap: 12px; transition: border-color .2s; }
+  .entry-row:hover { border-color: var(--border2); }
+  .entry-date { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text2); }
+  .entry-stat { font-size: 13px; font-weight: 500; }
+  .entry-stat .num { font-size: 16px; font-family: 'DM Mono', monospace; }
+  .entry-stat .lbl { font-size: 11px; opacity: .8; margin-left: 4px; }
+  .btn-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: 6px; transition: all .2s; }
+  .btn-del:hover { background: rgba(231,76,60,.15); color: var(--red); }
+  .empty-state { text-align: center; padding: 3rem; color: var(--text3); font-size: 14px; border: 1px dashed var(--border2); border-radius: 16px; }
+  .report-preview-shell { background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; }
+  .report-preview-shell .preview-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
+  .report-preview-shell .preview-label::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+  .report-wrap { display: none; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,.55); }
+  .report-wrap.visible { display: block; }
+  .rpt-title { text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 2px; padding: 20px 16px; border-bottom: 3px solid rgba(0,0,0,.12); }
+  .rpt-title.wood-mode { background: linear-gradient(135deg,#e8f8ee,#f0faf0); color: #1a7a1a; }
+  .rpt-maxes { background: #f8f8f8; display: flex; flex-direction: column; align-items: center; padding: 14px 0; border-bottom: 2px solid #1a237e; gap: 8px; }
+  .rpt-max-row { font-size: 15px; font-weight: 700; color: #c0392b; padding: 8px 36px; border: 1.5px solid #1a237e; width: 300px; text-align: center; border-radius: 4px; background: #fff; }
+  .rpt-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #fff; }
+  .rpt-col { display: flex; flex-direction: column; }
+  .rpt-day { display: flex; flex-direction: column; }
+  .rpt-col:not(:last-child) { border-right: 2px solid #1a237e; }
+  .rpt-day { border-bottom: 1.5px solid #1a237e; }
+  .rpt-day-header { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px; padding: 12px 16px; border-bottom: 1.5px solid #1a237e; text-align: center; }
+  .rpt-day-header.wood-date { color: #1a7a1a; background: #e8f8ee; }
+  .rpt-day-body { display: grid; grid-template-columns: 1fr 1fr; padding: 14px 16px 16px; background: #fff; gap: 8px; }
+  .rpt-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .rpt-stat-label { font-size: 13px; font-weight: 800; letter-spacing: 1.5px; color: #444; text-transform: uppercase; }
+  .rpt-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; line-height: 1; }
+  .rpt-stat-sub { font-size: 13px; font-weight: 800; letter-spacing: .6px; filter: brightness(0.68); }
+  .manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+  .manage-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; padding: 1.25rem; }
+  .manage-card-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; margin-bottom: 1rem; color: var(--text); }
+  .manage-card-title span { color: var(--mode-accent); }
+  .tier-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+  .tier-row:last-child { border-bottom: none; }
+  .tier-label { font-size: 13px; color: var(--text2); }
+  .tier-input { width: 90px; height: 40px; padding: 0 10px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 16px; text-align: center; outline: none; transition: border-color .2s; }
+  .tier-input:focus { border-color: var(--mode-accent); }
+  .hint { font-size: 11px; color: var(--text3); margin-top: 10px; line-height: 1.6; }
+  .save-row { display: flex; align-items: center; gap: 14px; }
+  .saved-note { font-size: 13px; color: var(--accent); opacity: 0; transition: opacity .3s; font-weight: 500; }
+  .saved-note.show { opacity: 1; }
+  .tier-legend { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; text-align: center; margin-bottom: 1.5rem; }
+  .tier-legend-item { padding: 12px 6px; border-radius: 10px; }
+  .tier-legend-label { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+  .tier-legend-pct { font-size: 11px; color: var(--text3); }
+  .btn-edit { background:none; border:1px solid var(--border2); color:var(--text3); cursor:pointer; font-size:12px; padding:3px 9px; border-radius:6px; transition:all .2s; white-space:nowrap; }
+  .btn-edit:hover { border-color:var(--mode-accent); color:var(--mode-accent); }
+  .entry-row.editing { border-color: var(--mode-accent); background: var(--bg3); }
+  .edit-inputs { display:flex; gap:6px; align-items:center; }
+  .edit-inp { width:70px; height:30px; padding:0 8px; background:var(--bg); border:1px solid var(--border2); border-radius:7px; color:var(--text); font-family:'DM Mono',monospace; font-size:14px; text-align:center; outline:none; }
+  .edit-inp:focus { border-color:var(--mode-accent); }
+  .btn-save-edit { height:30px; padding:0 12px; background:var(--mode-accent); border:none; border-radius:7px; color:#0f1117; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer; }
+  .btn-cancel-edit { height:30px; padding:0 10px; background:none; border:1px solid var(--border2); border-radius:7px; color:var(--text3); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; }
+  .modal-overlay.hidden { display:none; }
+  .modal { background:var(--bg2); border:1px solid var(--border2); border-radius:20px; padding:1.5rem; max-width:600px; width:100%; max-height:80vh; display:flex; flex-direction:column; gap:1rem; }
+  .modal-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; color:var(--text); }
+  .modal-subtitle { font-size:13px; color:var(--text3); margin-top:-8px; }
+  .modal-body { overflow-y:auto; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .modal-body::-webkit-scrollbar { width:4px; }
+  .modal-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+  .unknown-row { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:10px 14px; display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }
+  .unknown-info { display:flex; flex-direction:column; gap:2px; }
+  .unknown-code { font-family:'DM Mono',monospace; font-size:13px; color:var(--text); font-weight:500; }
+  .unknown-desc { font-size:11px; color:var(--text3); }
+  .unknown-qty { font-size:11px; color:var(--text2); }
+  .unknown-controls { display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .unk-btn { height:28px; padding:0 10px; border-radius:6px; border:1px solid var(--border2); background:none; color:var(--text2); font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .2s; white-space:nowrap; }
+  .unk-btn:hover { color:var(--text); border-color:var(--text2); }
+  .unk-btn.selected-fence { background:rgba(46,204,113,.2); border-color:#2ecc71; color:#2ecc71; }
+  .unk-btn.selected-gate  { background:rgba(233,30,140,.2); border-color:#e91e8c; color:#e91e8c; }
+  .unk-btn.selected-skip  { background:rgba(150,150,150,.15); border-color:#8b92a8; color:#8b92a8; }
+  .unk-btn.selected-x2    { background:rgba(241,196,15,.2); border-color:#f1c40f; color:#f1c40f; }
+  .unk-date-tag { font-size:10px; color:var(--text3); padding:2px 7px; background:var(--border); border-radius:10px; }
+  .modal-footer { display:flex; gap:10px; justify-content:flex-end; padding-top:.5rem; border-top:1px solid var(--border); }
+  #detail-overlay { z-index:400; }
+  #detail-panel { position:fixed; top:0; right:0; width:560px; height:100vh; background:var(--bg2); border-left:1px solid var(--border2); display:flex; flex-direction:column; z-index:401; transform:translateX(100%); transition:transform .3s cubic-bezier(.4,0,.2,1); box-shadow:-8px 0 40px rgba(0,0,0,.4); }
+  #detail-panel.open { transform:translateX(0); }
+  .detail-section-title { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text3); margin-bottom:6px; }
+  .detail-item { background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:10px 12px; display:grid; grid-template-columns:1fr auto; gap:6px; }
+  .detail-item-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .detail-code { font-family:"DM Mono",monospace; font-size:13px; font-weight:600; color:var(--text); }
+  .detail-desc { font-size:12px; color:var(--text2); margin-top:2px; line-height:1.4; }
+  .detail-tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+  .detail-tag.fence { background:rgba(46,204,113,.15); color:#2ecc71; }
+  .detail-tag.gate  { background:rgba(233,30,140,.15); color:#e91e8c; }
+  .detail-tag.x2    { background:rgba(241,196,15,.15); color:#f1c40f; }
+  .detail-count { font-family:"Bebas Neue",sans-serif; font-size:22px; text-align:right; line-height:1; }
+  .detail-count-sub { font-size:10px; color:var(--text3); text-align:right; }
+  .detail-total-row { display:flex; justify-content:space-between; align-items:center; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:10px 14px; }
+  .detail-total-label { font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
+  .detail-total-val { font-family:"Bebas Neue",sans-serif; font-size:28px; letter-spacing:1px; }
+  .detail-empty { text-align:center; color:var(--text3); font-size:13px; padding:2rem; border:1px dashed var(--border2); border-radius:12px; }
+  .panel-overlay { position:fixed; inset:0; background:rgba(0,0,0,.3); z-index:299; display:none; }
+  .panel-overlay.show { display:block; }
+  .code-manager { display:flex; flex-direction:column; gap:12px; }
+  .code-mgr-search { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .code-mgr-search input { flex:1; min-width:200px; height:36px; padding:0 12px; background:var(--bg3); border:1px solid var(--border2); border-radius:8px; color:var(--text); font-size:13px; outline:none; }
+  .code-mgr-search input:focus { border-color:var(--mode-accent); }
+  .code-mgr-filters { display:flex; gap:6px; }
+  .filter-btn { height:30px; padding:0 12px; border-radius:6px; border:1px solid var(--border2); background:none; color:var(--text2); font-size:12px; cursor:pointer; transition:all .2s; }
+  .filter-btn.active { background:var(--mode-accent); color:#0f1117; border-color:var(--mode-accent); }
+  .filter-btn:hover:not(.active) { border-color:var(--mode-accent); color:var(--mode-accent); }
+  .code-stats { font-size:12px; color:var(--text3); }
+  .code-table-wrap { max-height:420px; overflow-y:auto; border:1px solid var(--border2); border-radius:12px; }
+  .code-table-wrap::-webkit-scrollbar { width:4px; }
+  .code-table-wrap::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+  .code-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .code-table thead th { position:sticky; top:0; background:var(--bg3); padding:9px 12px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--text3); border-bottom:1px solid var(--border2); font-weight:600; }
+  .code-table tbody tr { border-bottom:1px solid var(--border); transition:background .15s; }
+  .code-table tbody tr:hover { background:var(--bg3); }
+  .code-table tbody tr:last-child { border-bottom:none; }
+  .code-table td { padding:7px 12px; color:var(--text); }
+  .code-td-code { font-family:"DM Mono",monospace; font-weight:600; font-size:12px; }
+  .type-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
+  .type-badge.f { background:rgba(46,204,113,.15); color:#2ecc71; }
+  .type-badge.g { background:rgba(233,30,140,.15); color:#e91e8c; }
+  .mult-select { height:28px; padding:0 6px; background:var(--bg3); border:1px solid var(--border2); border-radius:6px; color:var(--text); font-size:12px; cursor:pointer; outline:none; }
+  .mult-select:focus { border-color:var(--mode-accent); }
+  .mult-select.changed { border-color:var(--mode-accent); background:rgba(46,204,113,.08); }
+  .desc-rules-wrap { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:1rem; }
+  .desc-rule-row { display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); }
+  .desc-rule-row:last-child { border-bottom:none; }
+  .desc-rule-kw { font-family:"DM Mono",monospace; font-size:12px; color:var(--text); }
+  .desc-rule-mult { font-size:12px; color:var(--mode-accent); font-weight:600; }
+  .btn-del-rule2 { background:none; border:none; color:var(--text3); cursor:pointer; font-size:13px; padding:2px 5px; border-radius:4px; }
+  .btn-del-rule2:hover { color:var(--red); }
+  .add-rule-row { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  .add-rule-inp { height:32px; padding:0 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:7px; color:var(--text); font-size:13px; outline:none; flex:1; min-width:150px; }
+  .add-rule-inp:focus { border-color:var(--mode-accent); }
+  .add-rule-sel { height:32px; padding:0 8px; background:var(--bg3); border:1px solid var(--border2); border-radius:7px; color:var(--text); font-size:13px; cursor:pointer; outline:none; }
+  .btn-claude { height:28px; padding:0 10px; background:rgba(155,89,182,.15); border:1px solid rgba(155,89,182,.3); border-radius:6px; color:#a855f7; font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .2s; white-space:nowrap; }
+  .btn-claude:hover { background:rgba(155,89,182,.25); border-color:#a855f7; }
+  .claude-panel-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border2); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-shrink:0; }
+  .claude-panel-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; color:var(--text); }
+  .claude-panel-sub { font-size:12px; color:var(--text3); margin-top:2px; }
+  .btn-close-panel { background:none; border:1px solid var(--border2); border-radius:8px; color:var(--text3); cursor:pointer; font-size:16px; padding:4px 10px; transition:all .2s; }
+  .btn-close-panel:hover { border-color:var(--red); color:var(--red); }
+  /* codes import info box */
+  .codes-import-box { background:var(--bg3); border:1px solid var(--border2); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem; }
+  .codes-import-box h3 { font-size:13px; font-weight:600; color:var(--text); margin-bottom:8px; }
+  .codes-import-box p { font-size:12px; color:var(--text3); line-height:1.6; margin-bottom:10px; }
+  .codes-import-box code { font-family:'DM Mono',monospace; font-size:11px; background:var(--bg2); padding:2px 6px; border-radius:4px; color:var(--accent); }
+  @media print {
+    .app-header, .main > *:not(#report) { display: none !important; }
+    .report-wrap { display: block !important; border: 2px solid #1a237e; border-radius: 0; }
+    body { background: white; }
+  }
+  @media (max-width: 640px) {
+    .manage-grid { grid-template-columns: 1fr; }
+    .max-row { flex-direction: column; }
+    .input-row { flex-direction: column; align-items: flex-start; }
+    .tier-legend { grid-template-columns: repeat(3,1fr); }
+    .app-header { flex-wrap: wrap; height: auto; padding: .75rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">
+    <div class="logo-icon">WR</div>
+    <div class="logo-text">WOOD <span>REPORT</span></div>
+  </div>
+  <nav class="header-tabs">
+    <button class="htab active" onclick="switchTab('entry')">Daily Entry</button>
+    <button class="htab" onclick="switchTab('manage')">Manage</button>
+  </nav>
+</header>
+
+<div class="app-body">
+<main class="main">
+
+  <!-- ENTRY PANEL -->
+  <div class="panel active" id="panel-entry">
+    <div class="section-heading">
+      <h2>Daily Entry</h2>
+      <p>Add up to 15 working days</p>
+    </div>
+    <div class="max-row" id="maxes-display"></div>
+    <div class="input-card">
+      <div class="input-card-title">New entry</div>
+      <div class="input-row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="inp-date"/>
+        </div>
+        <div class="fg-group">
+          <div class="field">
+            <label>Fence</label>
+            <input type="number" id="inp-fence" placeholder="0" min="0"/>
+          </div>
+          <div class="field">
+            <label>Gate</label>
+            <input type="number" id="inp-gate" placeholder="0" min="0"/>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addEntry()">+ Add Day</button>
+        <button class="btn-secondary" onclick="toggleReport()">Print Report ↗</button>
+        <button class="btn-secondary" style="color:#3498db;border-color:rgba(52,152,219,.3);" onclick="generateSharedReport()">🔗 Share Report</button>
+        <button class="btn-secondary" onclick="document.getElementById('csv-file-inp').click()">📂 CSV</button>
+        <button class="btn-secondary" style="color:#e74c3c;border-color:rgba(231,76,60,.3);" onclick="clearAll()">🗑 Clear</button>
+        <input type="file" id="csv-file-inp" accept=".csv" style="display:none;" onchange="handleCSV(event)"/>
+      </div>
+    </div>
+    <div id="csv-result-banner" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;margin-bottom:1rem;font-size:13px;color:var(--text2);"></div>
+    <div class="entries-wrap" id="entry-list">
+      <div class="empty-state">No entries yet — fill in the form above to get started.</div>
+    </div>
+    <div class="report-preview-shell">
+      <div class="preview-label">Report Preview</div>
+      <div class="report-wrap" id="report">
+        <div class="rpt-title wood-mode" id="rpt-title" style="position:relative;text-align:center;padding:14px 120px;">
+          <span id="rpt-title-text">Wood Report</span>
+          <span id="rpt-timestamp" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:Arial,sans-serif;font-size:13px;font-weight:600;color:inherit;text-align:right;line-height:1.6;opacity:.85;"></span>
+        </div>
+        <div class="rpt-maxes">
+          <div class="rpt-max-row" id="rpt-fence-max"></div>
+          <div class="rpt-max-row" id="rpt-gate-max"></div>
+        </div>
+        <div class="rpt-cols">
+          <div class="rpt-col" id="rpt-left"></div>
+          <div class="rpt-col" id="rpt-mid"></div>
+          <div class="rpt-col" id="rpt-right"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE PANEL -->
+  <div class="panel" id="panel-manage">
+    <div class="section-heading"><h2>Manage</h2></div>
+    <div style="display:flex;gap:4px;margin-bottom:1.25rem;border-bottom:1px solid var(--border2);padding-bottom:0;">
+      <button class="filter-btn active" id="mtab-settings" onclick="switchManageTab('settings')" style="border-radius:8px 8px 0 0;margin-bottom:-1px;border-bottom-color:var(--bg);">Settings</button>
+      <button class="filter-btn" id="mtab-codes" onclick="switchManageTab('codes')" style="border-radius:8px 8px 0 0;margin-bottom:-1px;">Item Codes</button>
+      <button class="filter-btn" id="mtab-holidays" onclick="switchManageTab('holidays')" style="border-radius:8px 8px 0 0;margin-bottom:-1px;">&#127881; Holidays</button>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="manage-panel-settings">
+      <div class="manage-grid">
+        <div class="manage-card">
+          <div class="manage-card-title">Fence <span>Max</span></div>
+          <div class="tier-row">
+            <span class="tier-label">Max capacity</span>
+            <input class="tier-input" type="number" id="f-max" min="1"/>
+          </div>
+          <div class="hint" id="f-hint"></div>
+        </div>
+        <div class="manage-card">
+          <div class="manage-card-title">Gate <span>Max</span></div>
+          <div class="tier-row">
+            <span class="tier-label">Max capacity</span>
+            <input class="tier-input" type="number" id="g-max" min="1"/>
+          </div>
+          <div class="hint" id="g-hint"></div>
+        </div>
+      </div>
+      <div class="tier-legend">
+        <div class="tier-legend-item" style="background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.2);">
+          <div class="tier-legend-label" style="color:#2ecc71;">LIGHT</div>
+          <div class="tier-legend-pct">0% – 40%</div>
+        </div>
+        <div class="tier-legend-item" style="background:rgba(241,196,15,.1);border:1px solid rgba(241,196,15,.2);">
+          <div class="tier-legend-label" style="color:#f1c40f;">MODERATE</div>
+          <div class="tier-legend-pct">41% – 70%</div>
+        </div>
+        <div class="tier-legend-item" style="background:rgba(230,126,34,.1);border:1px solid rgba(230,126,34,.2);">
+          <div class="tier-legend-label" style="color:#e67e22;">HEAVY</div>
+          <div class="tier-legend-pct">71% – 99%</div>
+        </div>
+        <div class="tier-legend-item" style="background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.2);">
+          <div class="tier-legend-label" style="color:#e74c3c;">FULL</div>
+          <div class="tier-legend-pct">100% – 110%</div>
+        </div>
+        <div class="tier-legend-item" style="background:rgba(231,76,60,.2);border:1px solid rgba(231,76,60,.4);">
+          <div class="tier-legend-label" style="color:#e74c3c;font-size:10px;">SUPER FULL !!</div>
+          <div class="tier-legend-pct">above 110%</div>
+        </div>
+      </div>
+      <div class="save-row">
+        <button class="btn-primary" onclick="saveThresholds()">Save Changes</button>
+        <span class="saved-note" id="saved-note">✓ Changes saved!</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border2);">
+        <button class="btn-secondary" style="height:36px;flex:1;" onclick="exportSettings()">⬇ Export Settings</button>
+        <button class="btn-secondary" style="height:36px;flex:1;" onclick="importSettings()">⬆ Import Settings</button>
+      </div>
+    </div><!-- end manage-panel-settings -->
+
+    <!-- CODES PANEL -->
+    <div id="manage-panel-codes" style="display:none;">
+      <div class="code-manager">
+
+        <!-- Codes CSV import box -->
+        <div class="codes-import-box">
+          <h3>📥 Import Item Codes from CSV</h3>
+          <p>Upload your codes CSV. Required column: <code>Item Code</code> (or <code>Code</code>). Optional: <code>Description</code>, <code>Prod</code>, <code>Multiplier</code>.</p>
+          <p>Fence vs gate and multipliers are auto-detected from the prod number and code name — no Type column needed. Non-fence/gate lines (posts, lumber, rails, arbors) are skipped automatically. Importing replaces all existing codes.</p>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn-primary" style="height:36px;padding:0 18px;font-size:13px;" onclick="document.getElementById('codes-csv-inp').click()">📂 Import Codes CSV</button>
+            <button class="btn-secondary" style="height:36px;" onclick="clearAllCodes()">🗑 Clear All Codes</button>
+            <span id="codes-import-note" style="font-size:12px;color:var(--text3);"></span>
+          </div>
+          <input type="file" id="codes-csv-inp" accept=".csv" style="display:none;" onchange="handleCodesCSV(event)"/>
+        </div>
+
+        <!-- Description rules -->
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Description Rules</div>
+          <div class="desc-rules-wrap">
+            <div id="desc-rules-list"></div>
+            <div class="add-rule-row">
+              <input class="add-rule-inp" id="new-rule-kw" placeholder="Keyword e.g. RADIUS" />
+              <select class="add-rule-sel" id="new-rule-mult">
+                <option value="1">×1</option>
+                <option value="1.5">×1.5</option>
+                <option value="2">×2</option>
+                <option value="3">×3</option>
+                <option value="4">×4</option>
+                <option value="6" selected>×6</option>
+                <option value="8">×8</option>
+                <option value="10">×10</option>
+              </select>
+              <button class="btn-primary" style="height:32px;padding:0 14px;font-size:12px;" onclick="addDescRule()">+ Add Rule</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code search + list -->
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Item Codes <span class="code-stats" id="code-stats"></span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+            <div class="code-mgr-search" style="flex:1;">
+              <input id="code-search" placeholder="Search code or description..." oninput="renderCodeTable()" />
+              <div class="code-mgr-filters">
+                <button class="filter-btn active" id="cf-all"   onclick="setCodeFilter('all')">All</button>
+                <button class="filter-btn"        id="cf-type1" onclick="setCodeFilter('type1')">Fence</button>
+                <button class="filter-btn"        id="cf-type2" onclick="setCodeFilter('type2')">Gate</button>
+              </div>
+            </div>
+            <button class="btn-primary" style="height:36px;padding:0 16px;font-size:13px;white-space:nowrap;" onclick="showAddCodeModal()">+ Add Code</button>
+          </div>
+          <div class="code-table-wrap">
+            <table class="code-table">
+              <thead><tr><th>Code</th><th>Description</th><th>Prod</th><th>Type</th><th>Multiplier</th></tr></thead>
+              <tbody id="code-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- end manage-panel-codes -->
+
+    <!-- HOLIDAYS PANEL -->
+    <div id="manage-panel-holidays" style="display:none;">
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:1.25rem;">Add Holiday / Non-Working Day</div>
+        <table style="width:100%;border-collapse:separate;border-spacing:12px 0;">
+          <tr>
+            <td style="width:200px;vertical-align:top;">
+              <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Date</div>
+              <input type="date" id="holiday-date" style="display:block;width:100%;height:44px;padding:0 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;outline:none;color-scheme:dark;box-sizing:border-box;"/>
+            </td>
+            <td style="vertical-align:top;">
+              <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Holiday Name</div>
+              <input type="text" id="holiday-name" placeholder="e.g. Memorial Day" style="display:block;width:100%;height:44px;padding:0 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;outline:none;box-sizing:border-box;"/>
+            </td>
+            <td style="width:120px;vertical-align:bottom;">
+              <button onclick="addHoliday()" style="display:block;width:100%;height:44px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">+ Add</button>
+            </td>
+          </tr>
+        </table>
+        <div style="font-size:11px;color:var(--text3);margin-top:12px;line-height:1.6;">&#9432; If a weekend date would roll to a holiday Monday, it stays on the original weekend date instead. Holidays always appear in the report.</div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Scheduled Holidays</div>
+        <div id="holiday-list"></div>
+      </div>
+    </div><!-- end manage-panel-holidays -->
+
+  </div><!-- end panel-manage -->
+
+</main>
+</div>
+
+<!-- DAY DETAIL PANEL -->
+<div class="panel-overlay" id="detail-overlay" onclick="closeDetail()"></div>
+<div id="detail-panel">
+  <div class="claude-panel-header">
+    <div>
+      <div class="claude-panel-title" id="detail-title">Day Detail</div>
+      <div class="claude-panel-sub" id="detail-sub"></div>
+    </div>
+    <button class="btn-close-panel" onclick="closeDetail()">✕</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:12px;" id="detail-body"></div>
+</div>
+
+<!-- UNKNOWNS MODAL -->
+<div class="modal-overlay hidden" id="unknowns-modal">
+  <div class="modal">
+    <div>
+      <div class="modal-title">Unknown Items Found</div>
+      <div class="modal-subtitle">These codes weren't in the lookup. Classify each one — they'll be added to the matching days.</div>
+    </div>
+    <div class="modal-body" id="unknowns-body"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" style="height:36px;" onclick="dismissUnknowns()">Skip All</button>
+      <button class="btn-primary" style="height:36px;" onclick="applyUnknowns()">Apply Selections</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CODE MODAL -->
+<div class="modal-overlay hidden" id="add-code-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title">Add Item Code</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="field"><label>Code</label><input type="text" id="new-code-code" style="height:38px;"/></div>
+      <div class="field"><label>Description</label><input type="text" id="new-code-desc" style="height:38px;"/></div>
+      <div class="field"><label>Prod</label><input type="number" id="new-code-prod" style="height:38px;width:120px;"/></div>
+      <div style="display:flex;gap:10px;">
+        <div class="field"><label>Type</label>
+          <select id="new-code-type" style="height:38px;padding:0 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;outline:none;">
+            <option value="f">Fence</option>
+            <option value="g">Gate</option>
+          </select>
+        </div>
+        <div class="field"><label>Multiplier</label>
+          <select id="new-code-mult" style="height:38px;padding:0 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;outline:none;">
+            <option value="1">×1</option><option value="1.5">×1.5</option><option value="2">×2</option>
+            <option value="3">×3</option><option value="4">×4</option><option value="6">×6</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" style="height:36px;" onclick="hideAddCodeModal()">Cancel</button>
+      <button class="btn-primary" style="height:36px;" onclick="saveNewCode()">Add Code</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────
+let entries = [];
+const STORAGE_KEY = 'woodReport_v2';
+let importedDayItems = {};
+let pendingUnknowns  = [];
+const mode = 'wood';
+
+let configs = { wood: { fenceMax: 100, gateMax: 15 } };
+
+const LABELS = {
+  wood: { fence: 'Fence', gate: 'Gate', fenceMax: 'Fence Max', gateMax: 'Gate Max', title: 'Wood Report', rptTitle: 'WOOD REPORT' }
+};
+const ACCENT = { wood: '#2ecc71' };
+
+function cfg() { return configs[mode]; }
+
+// ── WOOD_LOOKUP and WOOD_CODES start empty — populated by CSV import ──
+let WOOD_LOOKUP = {};
+let WOOD_CODES  = [];
+
+// ── DESCRIPTION RULES ────────────────────────────────────────────────
+let DESC_RULES = [
+  { kw: 'RADIUS', mult: 6 }
+];
+
+// ── HOLIDAYS ─────────────────────────────────────────────────────────
+let HOLIDAYS = {};
+
+// ── STATUS / HINTS ───────────────────────────────────────────────────
+function getStatus(value, max) {
+  const pct = (value / max) * 100;
+  if (pct <= 40)  return { label: 'Light',          color: '#2ecc71' };
+  if (pct <= 70)  return { label: 'Moderate',       color: '#f1c40f' };
+  if (pct < 100)  return { label: 'Heavy',          color: '#e67e22' };
+  if (pct <= 110) return { label: 'Full',           color: '#e74c3c' };
+  return                  { label: 'Super Full !!', color: '#e74c3c' };
+}
+function fenceStatus(v) { return getStatus(v, cfg().fenceMax); }
+function gateStatus(v)  { return getStatus(v, cfg().gateMax);  }
+
+function buildHint(max) {
+  const light = Math.floor(max * 0.40), moderate = Math.floor(max * 0.70);
+  const heavy = max - 1, full = Math.floor(max * 1.10);
+  return `Light: 0–${light} &nbsp;·&nbsp; Moderate: ${light+1}–${moderate} &nbsp;·&nbsp; Heavy: ${moderate+1}–${heavy} &nbsp;·&nbsp; Full: ${max}–${full} &nbsp;·&nbsp; Super Full: ${full+1}+`;
+}
+
+// ── DATE HELPERS ─────────────────────────────────────────────────────
+function nextWorkday(str) {
+  const p = str.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
+  d.setDate(d.getDate() + 1);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function skipToWorkday(str) {
+  const p = str.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// CHANGE 1: fmtDate with day names
+function fmtDate(str) {
+  const p = str.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
+  const days = ['Sun.','Mon.','Tue.','Wed.','Thu.','Fri.','Sat.'];
+  const datePart = d.toLocaleDateString('en-US', {day:'numeric', month:'short'}).replace(' ','-').toUpperCase();
+  return days[d.getDay()] + ' ' + datePart;
+}
+
+// ── DISPLAY ───────────────────────────────────────────────────────────
+function updateMaxesDisplay() {
+  const lbl = LABELS[mode], accent = ACCENT[mode];
+  document.getElementById('maxes-display').innerHTML = `
+    <div class="max-card">
+      <div class="max-card-label" style="color:${accent}88;">${lbl.fenceMax}</div>
+      <div class="max-card-val" style="color:${accent};">${cfg().fenceMax}</div>
+    </div>
+    <div class="max-card">
+      <div class="max-card-label" style="color:${accent}88;">${lbl.gateMax}</div>
+      <div class="max-card-val" style="color:${accent};">${cfg().gateMax}</div>
+    </div>`;
+  document.getElementById('rpt-fence-max').textContent = `${lbl.fenceMax.toUpperCase()}   ${cfg().fenceMax}`;
+  document.getElementById('rpt-gate-max').textContent  = `${lbl.gateMax.toUpperCase()}   ${cfg().gateMax}`;
+}
+
+function loadManageInputs() {
+  document.getElementById('f-max').value = cfg().fenceMax;
+  document.getElementById('g-max').value = cfg().gateMax;
+  document.getElementById('f-hint').innerHTML = buildHint(cfg().fenceMax);
+  document.getElementById('g-hint').innerHTML = buildHint(cfg().gateMax);
+}
+
+document.getElementById('f-max').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  if (!isNaN(v) && v > 0) document.getElementById('f-hint').innerHTML = buildHint(v);
+});
+document.getElementById('g-max').addEventListener('input', function() {
+  const v = parseInt(this.value);
+  if (!isNaN(v) && v > 0) document.getElementById('g-hint').innerHTML = buildHint(v);
+});
+
+function saveThresholds() {
+  const fm = parseInt(document.getElementById('f-max').value);
+  const gm = parseInt(document.getElementById('g-max').value);
+  if (isNaN(fm) || fm < 1) { alert('First max must be a positive number.'); return; }
+  if (isNaN(gm) || gm < 1) { alert('Second max must be a positive number.'); return; }
+  configs[mode].fenceMax = fm;
+  configs[mode].gateMax  = gm;
+  updateMaxesDisplay(); loadManageInputs(); renderList(); renderReport(); saveToStorage();
+  const n = document.getElementById('saved-note');
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2500);
+}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.htab').forEach(t => { t.classList.remove('active'); t.style.background = ''; t.style.color = ''; });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const active = document.querySelector(`.htab[onclick="switchTab('${tab}')"]`);
+  active.classList.add('active');
+  active.style.background = ACCENT[mode];
+  active.style.color = '#0f1117';
+  document.getElementById(`panel-${tab}`).classList.add('active');
+}
+
+// CHANGE 2: switchManageTab wired up with holidays
+function switchManageTab(tab) {
+  document.getElementById('manage-panel-settings').style.display = tab==='settings' ? '' : 'none';
+  document.getElementById('manage-panel-codes').style.display    = tab==='codes'    ? '' : 'none';
+  document.getElementById('manage-panel-holidays').style.display = tab==='holidays' ? '' : 'none';
+  ['settings','codes','holidays'].forEach(function(t) {
+    var b = document.getElementById('mtab-' + t);
+    if (b) { b.classList.toggle('active', t === tab); }
+  });
+  if (tab === 'codes')    { renderDescRules(); renderCodeTable(); }
+  if (tab === 'holidays') { renderHolidays(); }
+}
+
+// ── ENTRIES ───────────────────────────────────────────────────────────
+function addEntry() {
+  if (entries.length >= 15) { alert('Maximum 15 days reached.'); return; }
+  const date  = document.getElementById('inp-date').value;
+  const fence = parseInt(document.getElementById('inp-fence').value);
+  const gate  = parseInt(document.getElementById('inp-gate').value);
+  if (!date || isNaN(fence) || isNaN(gate)) { alert('Fill in all fields.'); return; }
+  entries.push({ date, fence, gate });
+  entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+  document.getElementById('inp-fence').value = '';
+  document.getElementById('inp-gate').value  = '';
+  document.getElementById('inp-date').value  = nextWorkday(date);
+  document.getElementById('inp-fence').focus();
+  renderList(); renderReport(); saveToStorage();
+}
+
+function deleteEntry(i) { entries.splice(i, 1); renderList(); renderReport(); saveToStorage(); }
+
+let editingIndex = null;
+
+function renderList() {
+  const el = document.getElementById('entry-list');
+  const lbl = LABELS[mode];
+  if (entries.length === 0) {
+    el.innerHTML = '<div class="empty-state">No entries yet — fill in the form above to get started.</div>';
+    return;
+  }
+  el.innerHTML = entries.map((e, i) => {
+    const fs = fenceStatus(e.fence), gs = gateStatus(e.gate);
+    const fpct = Math.round((e.fence / cfg().fenceMax) * 100);
+    const gpct = Math.round((e.gate  / cfg().gateMax)  * 100);
+    if (editingIndex === i) {
+      return `<div class="entry-row editing">
+        <span class="entry-date">${fmtDate(e.date)}</span>
+        <div class="edit-inputs">
+          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;">${lbl.fence}</label>
+          <input class="edit-inp" id="edit-fence" type="number" value="${e.fence}" min="0"/>
+          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;">${lbl.gate}</label>
+          <input class="edit-inp" id="edit-gate" type="number" value="${e.gate}" min="0"/>
+          <button class="btn-save-edit" onclick="saveEdit(${i})">Save</button>
+          <button class="btn-cancel-edit" onclick="cancelEdit()">Cancel</button>
+        </div>
+        <button class="btn-del" onclick="deleteEntry(${i})">✕</button>
+      </div>`;
+    }
+    return `<div class="entry-row">
+      <span class="entry-date">${fmtDate(e.date)}</span>
+      <span class="entry-stat" style="color:${fs.color};">
+        <span class="num">${e.fence}</span>
+        <span class="lbl">${lbl.fence.toLowerCase()} · ${fs.label} (${fpct}%)</span>
+      </span>
+      <span class="entry-stat" style="color:${gs.color};">
+        <span class="num">${e.gate}</span>
+        <span class="lbl">${lbl.gate.toLowerCase()} · ${gs.label} (${gpct}%)</span>
+      </span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-claude" onclick="openDetail(${i})" style="background:rgba(233,30,140,.15);border-color:rgba(233,30,140,.3);color:#e91e8c;">📋 Detail</button>
+        <button class="btn-edit" onclick="startEdit(${i})">✏ Edit</button>
+        <button class="btn-del" onclick="deleteEntry(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  if (editingIndex !== null) {
+    const inp = document.getElementById('edit-fence');
+    if (inp) { inp.focus(); inp.select(); }
+  }
+}
+
+function startEdit(i)  { editingIndex = i; renderList(); }
+function cancelEdit()  { editingIndex = null; renderList(); }
+function saveEdit(i) {
+  const fence = parseInt(document.getElementById('edit-fence').value);
+  const gate  = parseInt(document.getElementById('edit-gate').value);
+  if (isNaN(fence) || isNaN(gate)) { alert('Please enter valid numbers.'); return; }
+  entries[i].fence = fence; entries[i].gate = gate;
+  editingIndex = null; renderList(); renderReport(); saveToStorage();
+}
+
+document.getElementById('inp-fence').addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); document.getElementById('inp-gate').focus(); } });
+document.getElementById('inp-gate').addEventListener('keydown',  e => { if (e.key==='Enter') { e.preventDefault(); addEntry(); } });
+
+// ── REPORT ────────────────────────────────────────────────────────────
+function dayCard(e) {
+  const fs = fenceStatus(e.fence), gs = gateStatus(e.gate);
+  const lbl = LABELS[mode];
+  return `<div class="rpt-day">
+    <div class="rpt-day-header wood-date">${fmtDate(e.date)}</div>
+    <div class="rpt-day-body">
+      <div class="rpt-stat">
+        <span class="rpt-stat-label">${lbl.fence.toUpperCase()}</span>
+        <span class="rpt-stat-val" style="color:${fs.color};">${e.fence}</span>
+        <span class="rpt-stat-sub" style="color:${fs.color};">${fs.label}</span>
+      </div>
+      <div class="rpt-stat">
+        <span class="rpt-stat-label">${lbl.gate.toUpperCase()}</span>
+        <span class="rpt-stat-val" style="color:${gs.color};">${e.gate}</span>
+        <span class="rpt-stat-sub" style="color:${gs.color};">${gs.label}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function holidayCard(iso, name) {
+  const p=iso.split('-'), d=new Date(+p[0],+p[1]-1,+p[2]);
+  const lbl=d.toLocaleDateString('en-US',{day:'numeric',month:'short'}).replace(' ','-').toUpperCase();
+  return '<div class="rpt-day" style="display:flex;flex-direction:column;">'
+    +'<div class="rpt-day-header" style="background:#1e2436;color:#8b92a8;">'+lbl+'</div>'
+    +'<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:4px;flex:1;background:#fff;">'
+    +'<div style="font-size:24px;">&#127881;</div>'
+    +'<div style="font-size:15px;font-weight:700;color:#555d75;">'+name+'</div>'
+    +'<div style="font-size:12px;color:#999;">Holiday</div>'
+    +'</div></div>';
+}
+
+function buildAllItems() {
+  var all = [];
+  entries.forEach(function(e) { all.push({type:'entry', data:e}); });
+  Object.keys(HOLIDAYS).forEach(function(iso) {
+    if (!entries.some(function(e) { return e.date===iso; }))
+      all.push({type:'holiday', iso:iso, name:HOLIDAYS[iso]});
+  });
+  all.sort(function(a,b) {
+    var da = a.type==='entry' ? a.data.date : a.iso;
+    var db = b.type==='entry' ? b.data.date : b.iso;
+    return new Date(da)-new Date(db);
+  });
+  return all;
+}
+
+function renderReport() {
+  const l=document.getElementById('rpt-left'), m=document.getElementById('rpt-mid'), r=document.getElementById('rpt-right');
+  const all=buildAllItems();
+  const total=all.length, col1=Math.ceil(total/3), col2=Math.ceil((total-col1)/2);
+  function ri(item) { return item.type==='holiday' ? holidayCard(item.iso,item.name) : dayCard(item.data); }
+  l.innerHTML = all.slice(0,col1).map(ri).join('');
+  m.innerHTML = all.slice(col1,col1+col2).map(ri).join('');
+  r.innerHTML = all.slice(col1+col2).map(ri).join('');
+}
+
+function toggleReport() {
+  const r = document.getElementById('report');
+  if (entries.length === 0) { alert('Add at least one entry first.'); return; }
+  r.classList.toggle('visible');
+  if (r.classList.contains('visible')) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+    const timeStr = now.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', hour12:true });
+    const ts = document.getElementById('rpt-timestamp');
+    if (ts) ts.innerHTML = 'Printed<br>' + dateStr + '<br>' + timeStr;
+    r.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// ── CODES CSV IMPORT ──────────────────────────────────────────────────
+// Prod number → fence/gate classification
+// Gate-only prods: 505, 515, 516
+// Fence-only prods: 510, 520
+// Mixed prod 525: use code pattern to decide
+// Skip prods: 500, 530, 535, 540, 550, 555, 560, 565, 570
+const CODES_GATE_ONLY  = new Set([505, 515, 516]);
+const CODES_FENCE_ONLY = new Set([510, 520]);
+const CODES_MIXED      = new Set([525]);
+const CODES_SKIP       = new Set([500, 530, 535, 540, 550, 555, 560, 565, 570]);
+
+// Auto-detect multiplier from code/description
+function autoMult(code, desc) {
+  const DOUBLE_KW = ['COLORADO','NEW YORK','MONTANA','BASKETWEAVE','BASKET WEAVE','DIAGONAL LATTICE','DIAG LAT','SQUARE LATTICE','SQLAT'];
+  const DOUBLE_PFX = ['WCO','WNY','WMT','WCOG','WNYG','WMTG','W1DL','W2DL','W4DL','W1SL','W2SL','W4SL','WBW','WSLG','WDLG'];
+  const hay = (code + ' ' + desc).toUpperCase();
+  if (desc.indexOf('RADIUS') >= 0) return 6;
+  if (DOUBLE_PFX.some(p => code.startsWith(p))) return 2;
+  if (DOUBLE_KW.some(kw => hay.includes(kw))) return 2;
+  if (code.indexOf('WGMOUNT') >= 0) return 2;
+  if (/\d+\+\d+/.test(hay)) return 2;  // topper pattern
+  if (code.startsWith('RC2G') || code.startsWith('RC3G')) return 1.5; // round cedar gates
+  return 1;
+}
+
+function handleCodesCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const lines = e.target.result.trim().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+      if (lines.length < 2) { alert('CSV appears empty.'); return; }
+
+      // Parse header — flexible column name matching
+      const header = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+
+      // Support "item code", "code", "itemcode"
+      let colCode = header.findIndex(h => h === 'item code' || h === 'code' || h === 'itemcode');
+      let colDesc = header.findIndex(h => h === 'description' || h === 'desc');
+      let colProd = header.findIndex(h => h === 'prod' || h === 'product' || h === 'prod line');
+      let colType = header.findIndex(h => h === 'type');
+      let colMult = header.findIndex(h => h === 'multiplier' || h === 'mult');
+
+      if (colCode < 0) { alert('CSV must have a "Code" or "Item Code" column.'); return; }
+
+      // Reset
+      WOOD_CODES  = [];
+      WOOD_LOOKUP = {};
+
+      let count = 0, skipped = 0;
+      lines.slice(1).forEach(function(line) {
+        if (!line.trim()) return;
+        const cols = parseCSVLine(line);
+        if (cols.length < 1) return;
+
+        const code = (cols[colCode]||'').trim().toUpperCase();
+        if (!code) return;
+
+        const desc = colDesc >= 0 ? (cols[colDesc]||'').trim().toUpperCase() : '';
+        const prodRaw = colProd >= 0 ? parseInt(cols[colProd]) || 0 : 0;
+
+        // Skip non-fence/gate prod lines
+        if (CODES_SKIP.has(prodRaw)) { skipped++; return; }
+
+        // Determine type
+        let type;
+        if (colType >= 0) {
+          // If CSV has a Type column, use it
+          const typeRaw = (cols[colType]||'').trim().toLowerCase();
+          type = (typeRaw === 'gate' || typeRaw === 'g') ? 'g' : 'f';
+        } else if (CODES_GATE_ONLY.has(prodRaw)) {
+          type = 'g';
+        } else if (CODES_FENCE_ONLY.has(prodRaw)) {
+          type = 'f';
+        } else if (CODES_MIXED.has(prodRaw)) {
+          // Mixed prod — use code pattern: codes ending in G before digits = gate
+          type = /[A-Z]G([0-9]|CUS)/i.test(code) ? 'g' : 'f';
+        } else if (prodRaw === 0) {
+          // No prod info — guess from code pattern
+          type = /[A-Z]G([0-9]|CUS)/i.test(code) ? 'g' : 'f';
+        } else {
+          // Unknown prod — skip
+          skipped++; return;
+        }
+
+        // Determine multiplier
+        const mult = colMult >= 0 ? (parseFloat(cols[colMult]) || 1) : autoMult(code, desc);
+
+        WOOD_CODES.push({ code, type, mult, desc, prod: prodRaw });
+        WOOD_LOOKUP[code] = [type, mult];
+        count++;
+      });
+
+      WOOD_CODES.sort(function(a,b) { return a.code.localeCompare(b.code); });
+
+      saveToStorage();
+      renderCodeTable();
+      const note = document.getElementById('codes-import-note');
+      note.textContent = '✓ ' + count + ' codes loaded' + (skipped ? ' (' + skipped + ' non-fence/gate skipped)' : '');
+      note.style.color = 'var(--accent)';
+    } catch(err) {
+      alert('Could not read codes CSV: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function clearAllCodes() {
+  if (!confirm('Clear all item codes? This cannot be undone.')) return;
+  WOOD_CODES  = [];
+  WOOD_LOOKUP = {};
+  saveToStorage();
+  renderCodeTable();
+  document.getElementById('codes-import-note').textContent = 'Codes cleared.';
+  document.getElementById('codes-import-note').style.color = 'var(--text3)';
+}
+
+// ── ORDER CSV IMPORT ──────────────────────────────────────────────────
+const DOUBLE_KEYWORDS = ['COLORADO','NEW YORK','MONTANA','BASKETWEAVE','BASKET WEAVE','DIAGONAL LATTICE','DIAG LAT','DIALAT','SQUARE LATTICE','SQ LATT','SQLATTICE','SQLAT','ARCHGATE','ARCH GATE'];
+const DOUBLE_PREFIXES = ['WCO','WNY','WMT','WDLG','WCOG','WNYG','WMTG','W1DL','W2DL','W4DL','W1SL','W2SL','W4SL','WBW','WSLG'];
+
+function fallbackDouble(code, desc) {
+  const hay = (code + ' ' + desc).toUpperCase();
+  if (DOUBLE_PREFIXES.some(p => code.toUpperCase().startsWith(p))) return true;
+  return DOUBLE_KEYWORDS.some(kw => hay.includes(kw));
+}
+function fallbackIsGate(code) { return /[A-Z]G([0-9\-]|CUS)/i.test(code.toUpperCase()); }
+function hasTopper(code, desc) { return /\d+\+\d+/.test((code + ' ' + desc).toUpperCase()); }
+
+function parseCSV(text) {
+  const SKIP_PRODS   = new Set([500,530,535,540,550,555,570]);
+  const GATE_ONLY_P  = new Set([505,515,516]);
+  const FENCE_ONLY_P = new Set([510,520]);
+  const MIXED_P      = new Set([525]);
+
+  const dayMap={}, dayItems={}, unknowns=[];
+  const rows = text.trim().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+
+  rows.forEach(function(rawLine) {
+    const cols = parseCSVLine(rawLine);
+    if (cols.length < 31) return;
+    const prodStr  = cols[16].trim();
+    const code     = cols[20].trim().toUpperCase();
+    const desc     = cols[21].trim().toUpperCase();
+    const qtyStr   = cols[22].trim();
+    const date     = cols[14].trim();
+    const delivery = cols[26].trim();
+    const so       = cols[27].trim().replace(/^0+/,'') || cols[27].trim();
+    const customer = cols[30].trim();
+
+    if (!prodStr || !/^\d+$/.test(prodStr)) return;
+    if (!code || code==='ITEMCODE' || code==='ITEM CODE') return;
+    if (!date || date.indexOf('/')<0) return;
+
+    const prod = parseInt(prodStr);
+    const qty  = parseInt(parseFloat(qtyStr));
+    if (isNaN(qty) || qty<=0) return;
+    if (SKIP_PRODS.has(prod)) return;
+
+    let itype=null, mult=1;
+    const lkp = WOOD_LOOKUP[code];
+    if (lkp) {
+      itype = lkp[0]==='g' ? 'gate' : 'fence';
+      mult  = lkp[1];
+    } else {
+      if (code.indexOf('CUS')>=0) { unknowns.push({code,desc,qty,date,prod,delivery,so,customer}); return; }
+      if (GATE_ONLY_P.has(prod))       itype='gate';
+      else if (FENCE_ONLY_P.has(prod)) itype='fence';
+      else if (MIXED_P.has(prod))      itype=fallbackIsGate(code)?'gate':'fence';
+      else return;
+      mult = (fallbackDouble(code,desc)||hasTopper(code,desc)) ? 2 : 1;
+      if (code.indexOf('WGMOUNT')>=0) mult=fallbackDouble(code,desc)?4:2;
+      if (desc.indexOf('RADIUS')>=0)  mult=6;
+    }
+
+    if (!itype) return;
+    if (hasTopper(code,desc) && mult<2 && code.indexOf('WT')!==0) mult=2;
+    if (code.indexOf('WGMOUNT')>=0) mult=fallbackDouble(code,desc)?4:2;
+    DESC_RULES.forEach(function(rule) {
+      if (desc.indexOf(rule.kw.toUpperCase())>=0) mult=rule.mult;
+    });
+    if (desc.indexOf('RADIUS')>=0) mult=6;
+
+    const count=qty*mult;
+    if (!dayMap[date])   dayMap[date]={fence:0,gate:0};
+    if (!dayItems[date]) dayItems[date]=[];
+    if (itype==='gate')  dayMap[date].gate  +=count;
+    if (itype==='fence') dayMap[date].fence +=count;
+    dayItems[date].push({code,desc,qty,mult,count,itype,delivery,so,customer});
+  });
+
+  return {dayMap,dayItems,unknowns};
+}
+
+function parseCSVLine(line) {
+  const cols=[]; let cur='', inQuote=false;
+  for (let i=0;i<line.length;i++) {
+    const ch=line[i];
+    if (ch==='"') { if (inQuote&&line[i+1]==='"'){cur+='"';i++;} else inQuote=!inQuote; }
+    else if (ch===','&&!inQuote) { cols.push(cur); cur=''; }
+    else { cur+=ch; }
+  }
+  cols.push(cur); return cols;
+}
+
+function handleCSV(event) {
+  const file=event.target.files[0]; if (!file) return;
+  const reader=new FileReader();
+  reader.onload=function(e) {
+    try {
+      const {dayMap,dayItems,unknowns}=parseCSV(e.target.result);
+      const dates=Object.keys(dayMap).sort((a,b)=>new Date(a)-new Date(b));
+      let added=0,skipped=0;
+      dates.forEach(date=>{
+        if (entries.length>=15){skipped++;return;}
+        const d=new Date(date); if (isNaN(d)) return;
+        while (d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()+1);
+        const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+        const origD=new Date(date), rolledOver=origD.getDay()===0||origD.getDay()===6;
+        if (dayItems[date]) {
+          const tagged=dayItems[date].map(it=>rolledOver?Object.assign({},it,{rolledFrom:date}):it);
+          importedDayItems[iso]=(importedDayItems[iso]||[]).concat(tagged);
+        }
+        const existing=entries.findIndex(en=>en.date===iso);
+        if (existing!==-1) {
+          entries[existing].fence=Math.ceil(entries[existing].fence+(dayMap[date].fence||0));
+          entries[existing].gate =Math.ceil(entries[existing].gate +(dayMap[date].gate ||0));
+        } else {
+          entries.push({date:iso,fence:Math.ceil(dayMap[date].fence||0),gate:Math.ceil(dayMap[date].gate||0)});
+        }
+        added++;
+      });
+      entries.sort((a,b)=>new Date(a.date)-new Date(b.date));
+      renderList(); renderReport();
+      const unkCount=unknowns.length;
+      const datesStr=dates.length?dates.join(', '):'none';
+      let msg=added>0
+        ?`✓ Imported <strong>${added} day${added!==1?'s':''}</strong>${skipped?' &nbsp;·&nbsp; '+skipped+' skipped':''} &nbsp;·&nbsp; Dates: ${datesStr}`
+        :`⚠️ No known fence/gate items found.`;
+      if (unkCount>0) msg+=` &nbsp;·&nbsp; <strong>${unkCount} unknown item${unkCount!==1?'s':''}</strong> need your review ↓`;
+      showBanner(msg,added>0?'success':'warning');
+      if (unkCount>0){pendingUnknowns=unknowns;showUnknownsModal(unknowns);}
+    } catch(err) { showBanner('❌ Could not read CSV: '+err.message,'error'); }
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function showBanner(html,type) {
+  const b=document.getElementById('csv-result-banner');
+  b.style.display='block';
+  b.style.borderColor=type==='success'?'rgba(46,204,113,.35)':type==='error'?'rgba(231,76,60,.35)':'rgba(241,196,15,.35)';
+  b.style.color=type==='success'?'#2ecc71':type==='error'?'#e74c3c':'#f1c40f';
+  b.innerHTML=html;
+}
+
+// ── UNKNOWNS MODAL ────────────────────────────────────────────────────
+function showUnknownsModal(unknowns) {
+  const body=document.getElementById('unknowns-body');
+  const byCode={};
+  unknowns.forEach(u=>{
+    if (!byCode[u.code]) byCode[u.code]={...u,dates:[],totalQty:0};
+    byCode[u.code].dates.push(u.date);
+    byCode[u.code].totalQty+=u.qty;
+  });
+  body.innerHTML=Object.values(byCode).map((u,i)=>{
+    const dateList=[...new Set(u.dates)].join(', ');
+    return `<div class="unknown-row" id="unk-row-${i}" data-code="${u.code}">
+      <div class="unknown-info">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="unknown-code">${u.code}</span>
+          <span class="unk-date-tag">${dateList}</span>
+          <span class="unknown-qty">qty: ${u.totalQty}</span>
+        </div>
+        <div class="unknown-desc">${u.desc||'—'}</div>
+      </div>
+      <div class="unknown-controls">
+        <button class="unk-btn" onclick="setUnkType(${i},'fence')" id="unk-f-${i}">Fence</button>
+        <button class="unk-btn" onclick="setUnkType(${i},'gate')"  id="unk-g-${i}">Gate</button>
+        <button class="unk-btn" onclick="setUnkType(${i},'x2')"   id="unk-x2-${i}">×2</button>
+        <button class="unk-btn selected-skip" onclick="setUnkType(${i},'skip')" id="unk-s-${i}">Skip</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('unknowns-modal').classList.remove('hidden');
+}
+
+function setUnkType(i,type) {
+  ['fence','gate','x2','skip'].forEach(t=>{
+    const btn=document.getElementById(`unk-${t[0]}-${i}`);
+    if (btn) btn.className='unk-btn'+(type===t?` selected-${t}`:'');
+  });
+  document.getElementById(`unk-row-${i}`).dataset.type=type;
+}
+function dismissUnknowns() { document.getElementById('unknowns-modal').classList.add('hidden'); pendingUnknowns=[]; }
+function applyUnknowns() {
+  const rows=document.querySelectorAll('#unknowns-body .unknown-row');
+  rows.forEach(row=>{
+    const type=row.dataset.type||'skip';
+    if (type==='skip'||!type) return;
+    const code=row.dataset.code;
+    const items=pendingUnknowns.filter(u=>u.code===code);
+    items.forEach(u=>{
+      const mult=(type==='x2')?2:1;
+      let finalType=type;
+      if (type==='x2') finalType=[505,515,516].includes(u.prod)?'gate':'fence';
+      const d=new Date(u.date); if (isNaN(d)) return;
+      const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      let entry=entries.find(en=>en.date===iso);
+      if (!entry){if(entries.length>=15)return;entry={date:iso,fence:0,gate:0};entries.push(entry);}
+      const count=u.qty*mult;
+      if (finalType==='gate')  entry.gate  +=count;
+      if (finalType==='fence') entry.fence +=count;
+    });
+  });
+  entries.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  renderList(); renderReport();
+  document.getElementById('unknowns-modal').classList.add('hidden');
+  pendingUnknowns=[];
+  showBanner('✓ Unknown items applied.','success');
+}
+
+// ── DAY DETAIL PANEL ──────────────────────────────────────────────────
+function openDetail(i) {
+  const e=entries[i], lbl=LABELS[mode], items=importedDayItems[e.date]||[];
+  document.getElementById('detail-overlay').style.display='block';
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('detail-title').textContent=fmtDate(e.date)+' — Detail';
+  document.getElementById('detail-sub').textContent=lbl.fence+': '+e.fence+'  ·  '+lbl.gate+': '+e.gate;
+  const body=document.getElementById('detail-body');
+  if (!items.length){body.innerHTML='<div class="detail-empty">No import data available for this day.<br><small>Import a CSV to see item details.</small></div>';return;}
+  const fences=items.filter(it=>it.itype==='fence'), gates=items.filter(it=>it.itype==='gate');
+  function dGroup(d){if(!d)return'OUR TRUCK';if(d.indexOf('PICK')>=0)return'PICK UP';if(d.indexOf('INSTALL')>=0)return'INSTALL/REPAIR';return'OUR TRUCK';}
+  function dStyle(d){if(d.indexOf('PICK')>=0)return'rgba(241,196,15,.15);color:#f1c40f';if(d.indexOf('INSTALL')>=0)return'rgba(155,89,182,.15);color:#a855f7';return'rgba(52,152,219,.15);color:#3498db';}
+  function dIcon(d){if(d.indexOf('PICK')>=0)return'📦';if(d.indexOf('INSTALL')>=0)return'🔧';return'🚚';}
+  function buildSection(list,type){
+    if(!list.length)return'';
+    const color=type==='fence'?'#2ecc71':'#e91e8c', typeLabel=type==='fence'?lbl.fence:lbl.gate;
+    const total=list.reduce((s,it)=>s+it.count,0);
+    const DORD=['OUR TRUCK','PICK UP','INSTALL/REPAIR'], byD={};
+    list.forEach(it=>{const dg=dGroup(it.delivery||'');if(!byD[dg])byD[dg]={};const so=it.so||'Unknown';if(!byD[dg][so])byD[dg][so]={items:[],customer:''};byD[dg][so].items.push(it);if(it.customer)byD[dg][so].customer=it.customer;});
+    let html='<div><div class="detail-section-title" style="color:'+color+';">'+typeLabel+'s — '+total+' total</div>';
+    DORD.forEach(dg=>{
+      if(!byD[dg])return;
+      const soMap=byD[dg], dgTotal=Object.values(soMap).reduce((s,g)=>s+g.items.reduce((ss,it)=>ss+it.count,0),0);
+      html+='<div style="margin-bottom:14px;"><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-radius:10px;border:1px solid var(--border2);margin-bottom:8px;"><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:'+dStyle(dg)+';">'+dIcon(dg)+' '+dg+'</span><span style="font-size:14px;font-weight:700;color:'+color+';">'+dgTotal+' pts</span></div>';
+      Object.keys(soMap).sort().forEach(so=>{
+        const group=soMap[so];
+        html+='<div style="margin-bottom:8px;padding-left:10px;border-left:2px solid var(--border2);"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:5px;"><span style="font-size:12px;font-weight:700;color:var(--text);">SO# '+so+'</span>'+(group.customer?'<span style="font-size:11px;color:var(--text2);">'+group.customer+'</span>':'')+'</div>';
+        group.items.forEach(it=>{
+          const multTag=it.mult>1?'<span class="detail-tag x2">×'+it.mult+'</span>':'';
+          const rollTag=it.rolledFrom?'<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(241,196,15,.15);color:#f1c40f;">📅 Sat rollover</span>':'';
+          html+='<div class="detail-item" style="margin-bottom:4px;"><div><div class="detail-item-top"><span class="detail-code">'+it.code+'</span><span class="detail-tag '+type+'">'+typeLabel+'</span>'+multTag+rollTag+'</div><div class="detail-desc">'+(it.desc||'—')+'</div></div><div><div class="detail-count" style="color:'+color+';">'+it.count+'</div><div class="detail-count-sub">qty '+it.qty+(it.mult>1?' ×'+it.mult:'')+'</div></div></div>';
+        });
+        html+='</div>';
+      });
+      html+='</div>';
+    });
+    return html+'</div>';
+  }
+  var html='<div style="display:flex;gap:10px;">';
+  html+='<div class="detail-total-row" style="flex:1;"><span class="detail-total-label">'+lbl.fence+'</span><span class="detail-total-val" style="color:#2ecc71;">'+e.fence+'</span></div>';
+  html+='<div class="detail-total-row" style="flex:1;"><span class="detail-total-label">'+lbl.gate+'</span><span class="detail-total-val" style="color:#e91e8c;">'+e.gate+'</span></div>';
+  html+='</div>';
+  html+=buildSection(fences,'fence')+buildSection(gates,'gate');
+  body.innerHTML=html;
+}
+function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); document.getElementById('detail-overlay').style.display='none'; }
+
+// ── CODE MANAGER ──────────────────────────────────────────────────────
+let codeFilter='all';
+
+function setCodeFilter(f) {
+  codeFilter=f;
+  ['all','type1','type2'].forEach(k=>document.getElementById('cf-'+k).classList.toggle('active',k===f));
+  renderCodeTable();
+}
+
+function renderDescRules() {
+  const el=document.getElementById('desc-rules-list');
+  if (!DESC_RULES.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0;">No rules yet.</div>';return;}
+  el.innerHTML=DESC_RULES.map((r,i)=>{
+    const multLabel=r.mult==='special'?'special':'×'+r.mult;
+    return '<div class="desc-rule-row"><span class="desc-rule-kw">'+r.kw+'</span><span class="desc-rule-mult">'+multLabel+'</span><button class="btn-del-rule2" onclick="deleteDescRule('+i+')">✕</button></div>';
+  }).join('');
+}
+
+function addDescRule() {
+  const kw=document.getElementById('new-rule-kw').value.trim().toUpperCase();
+  const mult=parseFloat(document.getElementById('new-rule-mult').value);
+  if (!kw){alert('Please enter a keyword.');return;}
+  if (DESC_RULES.some(r=>r.kw===kw)){alert('Rule for "'+kw+'" already exists.');return;}
+  DESC_RULES.push({kw,mult});
+  document.getElementById('new-rule-kw').value='';
+  renderDescRules(); saveToStorage(); showSavedToast();
+}
+function deleteDescRule(i) { DESC_RULES.splice(i,1); renderDescRules(); saveToStorage(); showSavedToast(); }
+
+function renderCodeTable() {
+  const q=(document.getElementById('code-search').value||'').trim().toUpperCase();
+  const body=document.getElementById('code-table-body');
+  let filtered=WOOD_CODES.filter(r=>{
+    if (codeFilter==='type1'&&r.type!=='f') return false;
+    if (codeFilter==='type2'&&r.type!=='g') return false;
+    if (q&&r.code.indexOf(q)<0&&(r.desc||'').toUpperCase().indexOf(q)<0) return false;
+    return true;
+  });
+  document.getElementById('code-stats').textContent='— '+filtered.length+' of '+WOOD_CODES.length;
+  if (!filtered.length) {
+    body.innerHTML=WOOD_CODES.length===0
+      ?'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:2rem;">No codes loaded yet. Import a Codes CSV above.</td></tr>'
+      :'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:1.5rem;">No codes match your search.</td></tr>';
+    return;
+  }
+  body.innerHTML=filtered.map(r=>{
+    const opts=[1,1.5,2,3,4,6,8,10].map(v=>'<option value="'+v+'"'+(r.mult===v?' selected':'')+'">×'+v+'</option>').join('');
+    return '<tr><td class="code-td-code">'+r.code+'</td>'
+      +'<td style="font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(r.desc||'')+'">'+( r.desc||'—')+'</td>'
+      +'<td style="font-size:12px;color:var(--text3);font-family:monospace;">'+(r.prod||'—')+'</td>'
+      +'<td><span class="type-badge '+r.type+'">'+(r.type==='f'?'Fence':'Gate')+'</span></td>'
+      +'<td><select class="mult-select" onchange="updateCodeMult(\''+r.code+'\',this)">'+opts+'</select></td>'
+      +'</tr>';
+  }).join('');
+}
+
+function updateCodeMult(code,sel) {
+  const mult=parseFloat(sel.value);
+  const entry=WOOD_CODES.find(r=>r.code===code);
+  if (entry) entry.mult=mult;
+  if (WOOD_LOOKUP[code]) WOOD_LOOKUP[code][1]=mult;
+  sel.classList.add('changed');
+  saveToStorage(); showSavedToast();
+}
+
+function showAddCodeModal() {
+  document.getElementById('add-code-modal').classList.remove('hidden');
+  document.getElementById('new-code-code').value='';
+  document.getElementById('new-code-desc').value='';
+  document.getElementById('new-code-prod').value='';
+  document.getElementById('new-code-type').value='f';
+  document.getElementById('new-code-mult').value='1';
+  document.getElementById('new-code-code').focus();
+}
+function hideAddCodeModal() { document.getElementById('add-code-modal').classList.add('hidden'); }
+function saveNewCode() {
+  const code=document.getElementById('new-code-code').value.trim().toUpperCase();
+  const desc=document.getElementById('new-code-desc').value.trim().toUpperCase();
+  const prod=parseInt(document.getElementById('new-code-prod').value)||0;
+  const type=document.getElementById('new-code-type').value;
+  const mult=parseFloat(document.getElementById('new-code-mult').value);
+  if (!code){alert('Please enter an item code.');return;}
+  if (WOOD_LOOKUP[code]){alert('"'+code+'" already exists.');return;}
+  WOOD_LOOKUP[code]=[type,mult];
+  WOOD_CODES.push({code,type,mult,desc,prod});
+  WOOD_CODES.sort((a,b)=>a.code.localeCompare(b.code));
+  hideAddCodeModal(); renderCodeTable(); saveToStorage(); showSavedToast();
+}
+
+// ── HOLIDAYS ──────────────────────────────────────────────────────────
+function isHoliday(iso) { return HOLIDAYS.hasOwnProperty(iso); }
+
+function renderHolidays() {
+  const list=document.getElementById('holiday-list');
+  const keys=Object.keys(HOLIDAYS).sort();
+  if (!keys.length){list.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0;">No holidays added yet.</div>';return;}
+  list.innerHTML=keys.map(iso=>{
+    const d=new Date(iso+'T00:00:00');
+    const label=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--text);">'+HOLIDAYS[iso]+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);">'+label+'</div></div>'
+      +'<button onclick="deleteHoliday(\''+iso+'\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px 8px;border-radius:6px;">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+function addHoliday() {
+  const dateVal=document.getElementById('holiday-date').value;
+  const nameVal=document.getElementById('holiday-name').value.trim();
+  if (!dateVal){alert('Please select a date.');return;}
+  if (!nameVal){alert('Please enter a holiday name.');return;}
+  HOLIDAYS[dateVal]=nameVal;
+  document.getElementById('holiday-date').value='';
+  document.getElementById('holiday-name').value='';
+  renderHolidays(); renderReport(); saveToStorage(); showSavedToast();
+}
+function deleteHoliday(iso) { delete HOLIDAYS[iso]; renderHolidays(); renderReport(); saveToStorage(); showSavedToast(); }
+
+// ── PERSISTENCE ───────────────────────────────────────────────────────
+function saveToStorage() {
+  try {
+    const data = {
+      entries:   entries,
+      configs:   configs,
+      descRules: DESC_RULES,
+      holidays:  HOLIDAYS,
+      mults:     {},
+      codes:     WOOD_CODES
+    };
+    WOOD_CODES.forEach(r=>{ if(r.mult!==1) data.mults[r.code]=r.mult; });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('Could not save:', e); }
+}
+
+function loadFromStorage() {
+  try {
+    const raw=localStorage.getItem(STORAGE_KEY); if (!raw) return;
+    const data=JSON.parse(raw);
+    if (data.entries)   entries    = data.entries;
+    if (data.configs)   configs    = data.configs;
+    if (data.descRules) DESC_RULES = data.descRules;
+    if (data.holidays)  HOLIDAYS   = data.holidays;
+    // Restore codes
+    if (data.codes && data.codes.length) {
+      WOOD_CODES  = data.codes;
+      WOOD_LOOKUP = {};
+      WOOD_CODES.forEach(r=>{ WOOD_LOOKUP[r.code]=[r.type, r.mult]; });
+    }
+    if (data.mults) {
+      Object.keys(data.mults).forEach(code=>{
+        if (WOOD_LOOKUP[code]) WOOD_LOOKUP[code][1]=data.mults[code];
+        const entry=WOOD_CODES.find(r=>r.code===code);
+        if (entry) entry.mult=data.mults[code];
+      });
+    }
+  } catch(e) { console.warn('Could not load:', e); }
+}
+
+function exportSettings() {
+  const data={version:1,exportedAt:new Date().toISOString(),configs,descRules:DESC_RULES,holidays:HOLIDAYS,codes:WOOD_CODES,mults:{}};
+  WOOD_CODES.forEach(r=>{if(r.mult!==1)data.mults[r.code]=r.mult;});
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wood-report-settings.json'; a.click();
+}
+
+function importSettings() {
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.onchange=function(e){
+    const file=e.target.files[0]; if (!file) return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try {
+        const data=JSON.parse(ev.target.result);
+        if (data.configs)   configs    = data.configs;
+        if (data.descRules) DESC_RULES = data.descRules;
+        if (data.holidays)  HOLIDAYS   = data.holidays;
+        if (data.codes && data.codes.length) {
+          WOOD_CODES=data.codes; WOOD_LOOKUP={};
+          WOOD_CODES.forEach(r=>{WOOD_LOOKUP[r.code]=[r.type,r.mult];});
+        }
+        if (data.mults) {
+          Object.keys(data.mults).forEach(code=>{
+            if(WOOD_LOOKUP[code])WOOD_LOOKUP[code][1]=data.mults[code];
+            const entry=WOOD_CODES.find(r=>r.code===code);
+            if(entry)entry.mult=data.mults[code];
+          });
+        }
+        updateMaxesDisplay(); loadManageInputs(); renderList(); renderReport();
+        saveToStorage(); alert('✓ Settings imported successfully!');
+      } catch(err){ alert('Could not read settings file: '+err.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+let _toastTimer=null;
+function showSavedToast() {
+  const t=document.getElementById('saved-note'); if(!t)return;
+  t.style.opacity='1'; clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>{t.style.opacity='0';},1800);
+}
+
+// ── CLEAR ALL ─────────────────────────────────────────────────────────
+function clearAll() {
+  if (!confirm('Clear all entries? This cannot be undone.')) return;
+  entries=[]; importedDayItems={};
+  renderList(); renderReport(); saveToStorage();
+  showBanner('✓ All entries cleared.','success');
+}
+
+// ── SHARED REPORT ─────────────────────────────────────────────────────
+function generateSharedReport() {
+  if (!entries.length){alert('Add at least one entry first.');return;}
+  const now=new Date();
+  const printedStr=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})+' '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+
+  function gStatus(val,max){const p=(val/max)*100;if(p<=40)return{label:'Light',color:'#27ae60'};if(p<=70)return{label:'Moderate',color:'#f39c12'};if(p<100)return{label:'Heavy',color:'#e67e22'};if(p<=110)return{label:'Full',color:'#e74c3c'};return{label:'Super Full !!',color:'#e74c3c'};}
+  function fmtL(dateStr){const p=dateStr.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]);const days=['Sun.','Mon.','Tue.','Wed.','Thu.','Fri.','Sat.'];const dp=d.toLocaleDateString('en-US',{day:'numeric',month:'short'}).replace(' ','-').toUpperCase();return days[d.getDay()]+' '+dp;}
+  function dGroup(d){if(!d)return'OUR TRUCK';if(d.indexOf('PICK')>=0)return'PICK UP';if(d.indexOf('INSTALL')>=0)return'INSTALL/REPAIR';return'OUR TRUCK';}
+  function dStyle(d){if(d.indexOf('PICK')>=0)return'background:rgba(241,196,15,.15);color:#f1c40f';if(d.indexOf('INSTALL')>=0)return'background:rgba(155,89,182,.15);color:#a855f7';return'background:rgba(52,152,219,.15);color:#3498db';}
+  function dIcon(d){if(d.indexOf('PICK')>=0)return'&#128230;';if(d.indexOf('INSTALL')>=0)return'&#128295;';return'&#128666;';}
+
+  // Build detail HTML for each entry
+  function buildDetailHTML(e) {
+    var items = importedDayItems[e.date] || [];
+    if (!items.length) return '<p style="color:#555d75;font-size:13px;font-style:italic;padding:8px 0;">No import data for this day.</p>';
+    var fences=items.filter(function(it){return it.itype==='fence';}), gates=items.filter(function(it){return it.itype==='gate';});
+    var DORD=['OUR TRUCK','PICK UP','INSTALL/REPAIR'];
+    function buildSec(list,color,typeLabel){
+      if(!list.length)return'';
+      var total=list.reduce(function(s,it){return s+it.count;},0);
+      var byD={};
+      list.forEach(function(it){var dg=dGroup(it.delivery||'');if(!byD[dg])byD[dg]={};var so=it.so||'Unknown';if(!byD[dg][so])byD[dg][so]={items:[],customer:''};byD[dg][so].items.push(it);if(it.customer)byD[dg][so].customer=it.customer;});
+      var h='<div style="margin-bottom:16px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:'+color+';margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.08);">'+typeLabel+'s &mdash; '+total+' total</div>';
+      DORD.forEach(function(dg){
+        if(!byD[dg])return;
+        var soMap=byD[dg],dgTotal=Object.values(soMap).reduce(function(s,g){return s+g.items.reduce(function(ss,it){return ss+it.count;},0);},0);
+        h+='<div style="margin-bottom:10px;"><div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-radius:8px;margin-bottom:5px;'+dStyle(dg)+'"><span style="font-size:11px;font-weight:600;">'+dIcon(dg)+' '+dg+'</span><span style="font-size:12px;font-weight:700;color:'+color+';">'+dgTotal+' pts</span></div>';
+        Object.keys(soMap).sort().forEach(function(so){
+          var grp=soMap[so];
+          h+='<div style="padding-left:10px;border-left:2px solid rgba(255,255,255,.1);margin-bottom:6px;"><div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px;"><span style="font-family:monospace;font-size:12px;font-weight:700;color:#f0f2f8;">SO# '+so+'</span>'+(grp.customer?'<span style="font-size:11px;color:#8b92a8;">'+grp.customer+'</span>':'')+'</div>';
+          grp.items.forEach(function(it){
+            var multTag=it.mult>1?'<span style="font-size:10px;font-weight:700;padding:1px 5px;border-radius:6px;background:rgba(241,196,15,.15);color:#f1c40f;margin-left:3px;">&times;'+it.mult+'</span>':'';
+            var rollTag=it.rolledFrom?'<span style="font-size:10px;font-weight:700;padding:1px 5px;border-radius:6px;background:rgba(241,196,15,.15);color:#f1c40f;margin-left:3px;">&#128197; Sat rollover</span>':'';
+            h+='<div style="display:flex;justify-content:space-between;align-items:center;background:#1e2436;border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px 10px;margin-bottom:3px;"><div><div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;"><span style="font-family:monospace;font-size:12px;font-weight:700;color:#f0f2f8;">'+it.code+'</span><span style="font-size:10px;font-weight:700;padding:1px 5px;border-radius:6px;background:'+color+'22;color:'+color+';">'+typeLabel+'</span>'+multTag+rollTag+'</div><div style="font-size:11px;color:#8b92a8;margin-top:1px;">'+(it.desc||'&mdash;')+'</div></div><div style="text-align:right;min-width:40px;"><div style="font-family:monospace;font-size:18px;font-weight:700;color:'+color+';">'+it.count+'</div><div style="font-size:10px;color:#555d75;">qty '+it.qty+(it.mult>1?' &times;'+it.mult:'')+'</div></div></div>';
+          });
+          h+='</div>';
+        });
+        h+='</div>';
+      });
+      return h+'</div>';
+    }
+    return buildSec(fences,'#2ecc71','Fence')+buildSec(gates,'#e91e8c','Gate');
+  }
+
+  var allItems=buildAllItems();
+
+  var css='*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"DM Sans",Arial,sans-serif;background:#0f1117;color:#f0f2f8;min-height:100vh;}'
+    +'.page{max-width:1300px;margin:0 auto;padding:1.5rem;}'
+    +'.header{text-align:center;padding:1.25rem 2rem;background:linear-gradient(135deg,#0d2b1a,#1a3d2a);border-radius:16px;margin-bottom:1.25rem;border:2px solid #2ecc71;position:relative;}'
+    +'.header h1{font-family:Georgia,serif;font-size:36px;letter-spacing:3px;color:#2ecc71;margin:0;font-weight:900;}'
+    +'.maxes{display:flex;gap:10px;justify-content:center;margin-top:8px;}'
+    +'.max-pill{padding:4px 16px;border:1.5px solid #2ecc71;border-radius:4px;font-size:13px;font-weight:700;color:#2ecc71;background:#0f1117;}'
+    +'.printed{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:11px;color:#2ecc71;text-align:right;line-height:1.6;opacity:.8;}'
+    +'.layout{display:flex;gap:16px;align-items:flex-start;}'
+    +'.grid{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-flow:column;gap:10px;flex:2;min-width:0;}'
+    +'.day-card{background:#181c27;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .2s;}'
+    +'.day-card:hover{border-color:rgba(46,204,113,.4);}'
+    +'.day-card.active{border-color:#2ecc71;box-shadow:0 0 0 1px #2ecc71;}'
+    +'.day-hdr{background:rgba(46,204,113,.08);padding:8px 12px;font-size:14px;font-weight:800;letter-spacing:1px;color:#2ecc71;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;}'
+    +'.stats{display:grid;grid-template-columns:1fr 1fr;padding:8px 12px;gap:4px;}'
+    +'.stat{display:flex;flex-direction:column;align-items:center;}'
+    +'.stat-lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:#555d75;text-transform:uppercase;}'
+    +'.stat-val{font-size:22px;font-weight:900;line-height:1.1;}'
+    +'.stat-sub{font-size:10px;font-weight:700;}'
+    +'.detail-panel{flex:1;background:#181c27;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.25rem;min-height:300px;max-height:80vh;overflow-y:auto;min-width:320px;max-width:400px;position:sticky;top:1rem;}'
+    +'.det-title{font-size:16px;font-weight:800;color:#f0f2f8;margin-bottom:3px;}'
+    +'.det-sub{font-size:12px;color:#8b92a8;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid rgba(255,255,255,.08);}'
+    +'.empty-msg{color:#555d75;text-align:center;padding:2rem;font-size:13px;}'
+    +'.tot-row{display:flex;gap:10px;margin-bottom:1rem;}'
+    +'.tot-card{flex:1;background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}'
+    +'.tot-lbl{font-size:11px;color:#8b92a8;text-transform:uppercase;letter-spacing:.5px;}'
+    +'.tot-val{font-size:18px;font-weight:900;font-family:monospace;}';
+
+  // Build card data map: id -> {detail, fence, gate, date} so clicks always find the right data
+  var cardDataMap={};
+  var grid='';
+  var cardId=0;
+  allItems.forEach(function(item){
+    var id=cardId++;
+    if(item.type==='holiday'){
+      var hd=new Date(item.iso+'T00:00:00'),hlabel=hd.toLocaleDateString('en-US',{day:'numeric',month:'short'}).replace(' ','-').toUpperCase();
+      grid+='<div class="day-card" id="card-'+id+'" style="cursor:default;border-color:rgba(255,255,255,.04);"><div class="day-hdr" style="color:#8b92a8;background:rgba(255,255,255,.03);">'+hlabel+' &#127881;</div><div class="stats" style="flex-direction:column;align-items:center;padding:12px;"><div style="font-size:13px;font-weight:700;color:#8b92a8;">'+item.name+'</div><div style="font-size:11px;color:#555d75;">Holiday</div></div></div>';
+      cardDataMap[id]=null;
+    } else {
+      var e=item.data,fs=gStatus(e.fence,cfg().fenceMax),gs=gStatus(e.gate,cfg().gateMax);
+      var det=buildDetailHTML(e);
+      cardDataMap[id]={detail:det,fence:e.fence,gate:e.gate,date:e.date};
+      grid+='<div class="day-card" id="card-'+id+'" onclick="showDetail('+id+')"><div class="day-hdr"><span>'+fmtL(e.date)+'</span><span style="font-size:11px;color:#2ecc71;opacity:.7;">&#9654;</span></div><div class="stats"><div class="stat"><div class="stat-lbl">FENCE</div><div class="stat-val" style="color:'+fs.color+';">'+e.fence+'</div><div class="stat-sub" style="color:'+fs.color+';">'+fs.label+'</div></div><div class="stat"><div class="stat-lbl">GATE</div><div class="stat-val" style="color:'+gs.color+';">'+e.gate+'</div><div class="stat-sub" style="color:'+gs.color+';">'+gs.label+'</div></div></div></div>';
+    }
+  });
+
+  var cmJSON=JSON.stringify(cardDataMap).replace(/</g,'\u003c').replace(/>/g,'\u003e');
+
+  var detailPanel='<div class="detail-panel" id="detail-panel">'
+    +'<div class="empty-msg" id="det-empty">&#128072; Click a day card to see its details</div>'
+    +'<div id="det-content" style="display:none;">'
+    +'<div class="det-title" id="det-title"></div>'
+    +'<div class="det-sub" id="det-sub"></div>'
+    +'<div class="tot-row" id="det-totals"></div>'
+    +'<div id="det-body"></div>'
+    +'</div></div>';
+
+  var toggleScript='var CM='+cmJSON+';'
+    +'function fmtL(ds){var p=ds.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);var days=["Sun.","Mon.","Tue.","Wed.","Thu.","Fri.","Sat."];var dp=d.toLocaleDateString("en-US",{day:"numeric",month:"short"}).replace(" ","-").toUpperCase();return days[d.getDay()]+" "+dp;}'
+    +'function showDetail(id){'
+    +'var key=String(id);'
+    +'document.querySelectorAll(".day-card").forEach(function(c){c.classList.remove("active");});'
+    +'var card=document.getElementById("card-"+id); if(card)card.classList.add("active");'
+    +'var data=CM[key]; if(!data)return;'
+    +'document.getElementById("det-empty").style.display="none";'
+    +'document.getElementById("det-content").style.display="block";'
+    +'document.getElementById("det-title").textContent=fmtL(data.date);'
+    +'document.getElementById("det-sub").style.display="none";'
+    +'document.getElementById("det-totals").innerHTML="<div class=\'tot-card\'><span class=\'tot-lbl\'>Fence</span><span class=\'tot-val\' style=\'color:#2ecc71;\'>"+data.fence+"</span></div><div class=\'tot-card\'><span class=\'tot-lbl\'>Gate</span><span class=\'tot-val\' style=\'color:#e91e8c;\'>"+data.gate+"</span></div>";'
+    +'document.getElementById("det-body").innerHTML=data.detail||"<p style=\'color:#555d75;font-size:13px;\'>No import data for this day.</p>";'
+    +'}';
+
+  var dateStr=now.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'2-digit'}).replace(/\//g,'-');
+  var fullHTML='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>'
+    +'<meta name="viewport" content="width=device-width,initial-scale=1.0"/>'
+    +'<title>Wood Report '+printedStr+'<\/title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>'
+    +'<style>'+css+'<\/style><\/head><body>'
+    +'<div class="page">'
+    +'<div class="header"><div class="printed">Printed<br>'+printedStr+'<\/div><h1>WOOD REPORT<\/h1>'
+    +'<div class="maxes"><div class="max-pill">FENCE MAX '+cfg().fenceMax+'<\/div><div class="max-pill">GATE MAX '+cfg().gateMax+'<\/div><\/div><\/div>'
+    +'<div class="layout"><div class="grid" style="grid-template-rows:repeat('+Math.ceil(allItems.length/3)+',auto);">'+grid+'<\/div>'+detailPanel+'<\/div>'
+    +'<p style="text-align:center;color:#555;font-size:11px;margin-top:1rem;">Generated by Wood Report &mdash; '+printedStr+'<\/p>'
+    +'<\/div>'
+    +'<scr'+'ipt>'+toggleScript+'<\/scr'+'ipt>'
+    +'<\/body><\/html>';
+
+  var blob=new Blob([fullHTML],{type:'text/html'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wood-report-'+dateStr+'.html'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+(function init() {
+  loadFromStorage();
+  const t=new Date();
+  const s=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  document.getElementById('inp-date').value=skipToWorkday(s);
+  updateMaxesDisplay();
+  loadManageInputs();
+  document.querySelector('.htab.active').style.background=ACCENT['wood'];
+  document.querySelector('.htab.active').style.color='#0f1117';
+  renderDescRules();
+  renderCodeTable();
+})();
+</script>
+</body>
+</html>

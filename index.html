@@ -222,7 +222,7 @@
 </style>
 </head>
 <body>
-
+ 
 <header class="app-header">
   <div class="app-logo">
     <div class="logo-icon">WR</div>
@@ -233,10 +233,10 @@
     <button class="htab" onclick="switchTab('manage')">Manage</button>
   </nav>
 </header>
-
+ 
 <div class="app-body">
 <main class="main">
-
+ 
   <!-- ENTRY PANEL -->
   <div class="panel active" id="panel-entry">
     <div class="section-heading">
@@ -292,7 +292,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- MANAGE PANEL -->
   <div class="panel" id="panel-manage">
     <div class="section-heading"><h2>Manage</h2></div>
@@ -301,7 +301,7 @@
       <button class="filter-btn" id="mtab-codes" onclick="switchManageTab('codes')" style="border-radius:8px 8px 0 0;margin-bottom:-1px;">Item Codes</button>
       <button class="filter-btn" id="mtab-holidays" onclick="switchManageTab('holidays')" style="border-radius:8px 8px 0 0;margin-bottom:-1px;">&#127881; Holidays</button>
     </div>
-
+ 
     <!-- SETTINGS -->
     <div id="manage-panel-settings">
       <div class="manage-grid">
@@ -353,11 +353,11 @@
         <button class="btn-secondary" style="height:36px;flex:1;" onclick="importSettings()">⬆ Import Settings</button>
       </div>
     </div><!-- end manage-panel-settings -->
-
+ 
     <!-- CODES PANEL -->
     <div id="manage-panel-codes" style="display:none;">
       <div class="code-manager">
-
+ 
         <!-- Codes CSV import box -->
         <div class="codes-import-box">
           <h3>📥 Import Item Codes from CSV</h3>
@@ -370,7 +370,7 @@
           </div>
           <input type="file" id="codes-csv-inp" accept=".csv" style="display:none;" onchange="handleCodesCSV(event)"/>
         </div>
-
+ 
         <!-- Description rules -->
         <div>
           <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Description Rules</div>
@@ -392,7 +392,7 @@
             </div>
           </div>
         </div>
-
+ 
         <!-- Code search + list -->
         <div>
           <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Item Codes <span class="code-stats" id="code-stats"></span></div>
@@ -414,10 +414,10 @@
             </table>
           </div>
         </div>
-
+ 
       </div>
     </div><!-- end manage-panel-codes -->
-
+ 
     <!-- HOLIDAYS PANEL -->
     <div id="manage-panel-holidays" style="display:none;">
       <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
@@ -444,12 +444,12 @@
         <div id="holiday-list"></div>
       </div>
     </div><!-- end manage-panel-holidays -->
-
+ 
   </div><!-- end panel-manage -->
-
+ 
 </main>
 </div>
-
+ 
 <!-- DAY DETAIL PANEL -->
 <div class="panel-overlay" id="detail-overlay" onclick="closeDetail()"></div>
 <div id="detail-panel">
@@ -462,7 +462,7 @@
   </div>
   <div style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:12px;" id="detail-body"></div>
 </div>
-
+ 
 <!-- UNKNOWNS MODAL -->
 <div class="modal-overlay hidden" id="unknowns-modal">
   <div class="modal">
@@ -477,7 +477,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- ADD CODE MODAL -->
 <div class="modal-overlay hidden" id="add-code-modal">
   <div class="modal" style="max-width:420px;">
@@ -507,7 +507,7 @@
     </div>
   </div>
 </div>
-
+ 
 <script>
 // ── STATE ─────────────────────────────────────────────────────────────
 let entries = [];
@@ -515,28 +515,28 @@ const STORAGE_KEY = 'woodReport_v2';
 let importedDayItems = {};
 let pendingUnknowns  = [];
 const mode = 'wood';
-
+ 
 let configs = { wood: { fenceMax: 100, gateMax: 15 } };
-
+ 
 const LABELS = {
   wood: { fence: 'Fence', gate: 'Gate', fenceMax: 'Fence Max', gateMax: 'Gate Max', title: 'Wood Report', rptTitle: 'WOOD REPORT' }
 };
 const ACCENT = { wood: '#2ecc71' };
-
+ 
 function cfg() { return configs[mode]; }
-
+ 
 // ── WOOD_LOOKUP and WOOD_CODES start empty — populated by CSV import ──
 let WOOD_LOOKUP = {};
 let WOOD_CODES  = [];
-
+ 
 // ── DESCRIPTION RULES ────────────────────────────────────────────────
 let DESC_RULES = [
   { kw: 'RADIUS', mult: 6 }
 ];
-
+ 
 // ── HOLIDAYS ─────────────────────────────────────────────────────────
 let HOLIDAYS = {};
-
+ 
 // ── STATUS / HINTS ───────────────────────────────────────────────────
 function getStatus(value, max) {
   const pct = (value / max) * 100;
@@ -548,13 +548,13 @@ function getStatus(value, max) {
 }
 function fenceStatus(v) { return getStatus(v, cfg().fenceMax); }
 function gateStatus(v)  { return getStatus(v, cfg().gateMax);  }
-
+ 
 function buildHint(max) {
   const light = Math.floor(max * 0.40), moderate = Math.floor(max * 0.70);
   const heavy = max - 1, full = Math.floor(max * 1.10);
   return `Light: 0–${light} &nbsp;·&nbsp; Moderate: ${light+1}–${moderate} &nbsp;·&nbsp; Heavy: ${moderate+1}–${heavy} &nbsp;·&nbsp; Full: ${max}–${full} &nbsp;·&nbsp; Super Full: ${full+1}+`;
 }
-
+ 
 // ── DATE HELPERS ─────────────────────────────────────────────────────
 function nextWorkday(str) {
   const p = str.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
@@ -567,7 +567,7 @@ function skipToWorkday(str) {
   while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
+ 
 // CHANGE 1: fmtDate with day names
 function fmtDate(str) {
   const p = str.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
@@ -575,7 +575,7 @@ function fmtDate(str) {
   const datePart = d.toLocaleDateString('en-US', {day:'numeric', month:'short'}).replace(' ','-').toUpperCase();
   return days[d.getDay()] + ' ' + datePart;
 }
-
+ 
 // ── DISPLAY ───────────────────────────────────────────────────────────
 function updateMaxesDisplay() {
   const lbl = LABELS[mode], accent = ACCENT[mode];
@@ -591,14 +591,14 @@ function updateMaxesDisplay() {
   document.getElementById('rpt-fence-max').textContent = `${lbl.fenceMax.toUpperCase()}   ${cfg().fenceMax}`;
   document.getElementById('rpt-gate-max').textContent  = `${lbl.gateMax.toUpperCase()}   ${cfg().gateMax}`;
 }
-
+ 
 function loadManageInputs() {
   document.getElementById('f-max').value = cfg().fenceMax;
   document.getElementById('g-max').value = cfg().gateMax;
   document.getElementById('f-hint').innerHTML = buildHint(cfg().fenceMax);
   document.getElementById('g-hint').innerHTML = buildHint(cfg().gateMax);
 }
-
+ 
 document.getElementById('f-max').addEventListener('input', function() {
   const v = parseInt(this.value);
   if (!isNaN(v) && v > 0) document.getElementById('f-hint').innerHTML = buildHint(v);
@@ -607,7 +607,7 @@ document.getElementById('g-max').addEventListener('input', function() {
   const v = parseInt(this.value);
   if (!isNaN(v) && v > 0) document.getElementById('g-hint').innerHTML = buildHint(v);
 });
-
+ 
 function saveThresholds() {
   const fm = parseInt(document.getElementById('f-max').value);
   const gm = parseInt(document.getElementById('g-max').value);
@@ -620,7 +620,7 @@ function saveThresholds() {
   n.classList.add('show');
   setTimeout(() => n.classList.remove('show'), 2500);
 }
-
+ 
 // ── TAB SWITCHING ─────────────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.htab').forEach(t => { t.classList.remove('active'); t.style.background = ''; t.style.color = ''; });
@@ -631,7 +631,7 @@ function switchTab(tab) {
   active.style.color = '#0f1117';
   document.getElementById(`panel-${tab}`).classList.add('active');
 }
-
+ 
 // CHANGE 2: switchManageTab wired up with holidays
 function switchManageTab(tab) {
   document.getElementById('manage-panel-settings').style.display = tab==='settings' ? '' : 'none';
@@ -644,7 +644,7 @@ function switchManageTab(tab) {
   if (tab === 'codes')    { renderDescRules(); renderCodeTable(); }
   if (tab === 'holidays') { renderHolidays(); }
 }
-
+ 
 // ── ENTRIES ───────────────────────────────────────────────────────────
 function addEntry() {
   if (entries.length >= 15) { alert('Maximum 15 days reached.'); return; }
@@ -660,11 +660,11 @@ function addEntry() {
   document.getElementById('inp-fence').focus();
   renderList(); renderReport(); saveToStorage();
 }
-
+ 
 function deleteEntry(i) { entries.splice(i, 1); renderList(); renderReport(); saveToStorage(); }
-
+ 
 let editingIndex = null;
-
+ 
 function renderList() {
   const el = document.getElementById('entry-list');
   const lbl = LABELS[mode];
@@ -712,7 +712,7 @@ function renderList() {
     if (inp) { inp.focus(); inp.select(); }
   }
 }
-
+ 
 function startEdit(i)  { editingIndex = i; renderList(); }
 function cancelEdit()  { editingIndex = null; renderList(); }
 function saveEdit(i) {
@@ -722,10 +722,10 @@ function saveEdit(i) {
   entries[i].fence = fence; entries[i].gate = gate;
   editingIndex = null; renderList(); renderReport(); saveToStorage();
 }
-
+ 
 document.getElementById('inp-fence').addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); document.getElementById('inp-gate').focus(); } });
 document.getElementById('inp-gate').addEventListener('keydown',  e => { if (e.key==='Enter') { e.preventDefault(); addEntry(); } });
-
+ 
 // ── REPORT ────────────────────────────────────────────────────────────
 function dayCard(e) {
   const fs = fenceStatus(e.fence), gs = gateStatus(e.gate);
@@ -746,26 +746,32 @@ function dayCard(e) {
     </div>
   </div>`;
 }
-
+ 
 function holidayCard(iso, name) {
   const p=iso.split('-'), d=new Date(+p[0],+p[1]-1,+p[2]);
   const lbl=d.toLocaleDateString('en-US',{day:'numeric',month:'short'}).replace(' ','-').toUpperCase();
-  return '<div class="rpt-day" style="display:flex;flex-direction:column;">'
+  return '<div class="rpt-day">'
     +'<div class="rpt-day-header" style="background:#1e2436;color:#8b92a8;">'+lbl+'</div>'
-    +'<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:4px;flex:1;background:#fff;">'
-    +'<div style="font-size:24px;">&#127881;</div>'
-    +'<div style="font-size:15px;font-weight:700;color:#555d75;">'+name+'</div>'
-    +'<div style="font-size:12px;color:#999;">Holiday</div>'
+    +'<div class="rpt-day-body" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:104px;">'
+    +'<div style="font-size:23px;line-height:1;">&#127881;</div>'
+    +'<div style="font-size:15px;font-weight:700;color:#555d75;line-height:1.2;">'+name+'</div>'
+    +'<div style="font-size:12px;color:#999;line-height:1.2;">Holiday</div>'
     +'</div></div>';
 }
-
+ 
 function buildAllItems() {
   var all = [];
   entries.forEach(function(e) { all.push({type:'entry', data:e}); });
-  Object.keys(HOLIDAYS).forEach(function(iso) {
-    if (!entries.some(function(e) { return e.date===iso; }))
-      all.push({type:'holiday', iso:iso, name:HOLIDAYS[iso]});
-  });
+  // Only include holidays that fall within the range of actual entries
+  if (entries.length) {
+    var firstDate = new Date(entries[0].date);
+    var lastDate  = new Date(entries[entries.length-1].date);
+    Object.keys(HOLIDAYS).forEach(function(iso) {
+      var hDate = new Date(iso);
+      if (hDate >= firstDate && hDate <= lastDate && !entries.some(function(e) { return e.date===iso; }))
+        all.push({type:'holiday', iso:iso, name:HOLIDAYS[iso]});
+    });
+  }
   all.sort(function(a,b) {
     var da = a.type==='entry' ? a.data.date : a.iso;
     var db = b.type==='entry' ? b.data.date : b.iso;
@@ -773,7 +779,7 @@ function buildAllItems() {
   });
   return all;
 }
-
+ 
 function renderReport() {
   const l=document.getElementById('rpt-left'), m=document.getElementById('rpt-mid'), r=document.getElementById('rpt-right');
   const all=buildAllItems();
@@ -783,7 +789,7 @@ function renderReport() {
   m.innerHTML = all.slice(col1,col1+col2).map(ri).join('');
   r.innerHTML = all.slice(col1+col2).map(ri).join('');
 }
-
+ 
 function toggleReport() {
   const r = document.getElementById('report');
   if (entries.length === 0) { alert('Add at least one entry first.'); return; }
@@ -797,7 +803,7 @@ function toggleReport() {
     r.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
-
+ 
 // ── CODES CSV IMPORT ──────────────────────────────────────────────────
 // Prod number → fence/gate classification
 // Gate-only prods: 505, 515, 516
@@ -808,7 +814,7 @@ const CODES_GATE_ONLY  = new Set([505, 515, 516]);
 const CODES_FENCE_ONLY = new Set([510, 520]);
 const CODES_MIXED      = new Set([525]);
 const CODES_SKIP       = new Set([500, 530, 535, 540, 550, 555, 560, 565, 570]);
-
+ 
 // Auto-detect multiplier from code/description
 function autoMult(code, desc) {
   const DOUBLE_KW = ['COLORADO','NEW YORK','MONTANA','BASKETWEAVE','BASKET WEAVE','DIAGONAL LATTICE','DIAG LAT','SQUARE LATTICE','SQLAT'];
@@ -822,7 +828,7 @@ function autoMult(code, desc) {
   if (code.startsWith('RC2G') || code.startsWith('RC3G')) return 1.5; // round cedar gates
   return 1;
 }
-
+ 
 function handleCodesCSV(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -831,38 +837,38 @@ function handleCodesCSV(event) {
     try {
       const lines = e.target.result.trim().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
       if (lines.length < 2) { alert('CSV appears empty.'); return; }
-
+ 
       // Parse header — flexible column name matching
       const header = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
-
+ 
       // Support "item code", "code", "itemcode"
       let colCode = header.findIndex(h => h === 'item code' || h === 'code' || h === 'itemcode');
       let colDesc = header.findIndex(h => h === 'description' || h === 'desc');
       let colProd = header.findIndex(h => h === 'prod' || h === 'product' || h === 'prod line');
       let colType = header.findIndex(h => h === 'type');
       let colMult = header.findIndex(h => h === 'multiplier' || h === 'mult');
-
+ 
       if (colCode < 0) { alert('CSV must have a "Code" or "Item Code" column.'); return; }
-
+ 
       // Reset
       WOOD_CODES  = [];
       WOOD_LOOKUP = {};
-
+ 
       let count = 0, skipped = 0;
       lines.slice(1).forEach(function(line) {
         if (!line.trim()) return;
         const cols = parseCSVLine(line);
         if (cols.length < 1) return;
-
+ 
         const code = (cols[colCode]||'').trim().toUpperCase();
         if (!code) return;
-
+ 
         const desc = colDesc >= 0 ? (cols[colDesc]||'').trim().toUpperCase() : '';
         const prodRaw = colProd >= 0 ? parseInt(cols[colProd]) || 0 : 0;
-
+ 
         // Skip non-fence/gate prod lines
         if (CODES_SKIP.has(prodRaw)) { skipped++; return; }
-
+ 
         // Determine type
         let type;
         if (colType >= 0) {
@@ -883,17 +889,17 @@ function handleCodesCSV(event) {
           // Unknown prod — skip
           skipped++; return;
         }
-
+ 
         // Determine multiplier
         const mult = colMult >= 0 ? (parseFloat(cols[colMult]) || 1) : autoMult(code, desc);
-
+ 
         WOOD_CODES.push({ code, type, mult, desc, prod: prodRaw });
         WOOD_LOOKUP[code] = [type, mult];
         count++;
       });
-
+ 
       WOOD_CODES.sort(function(a,b) { return a.code.localeCompare(b.code); });
-
+ 
       saveToStorage();
       renderCodeTable();
       const note = document.getElementById('codes-import-note');
@@ -906,7 +912,7 @@ function handleCodesCSV(event) {
   };
   reader.readAsText(file);
 }
-
+ 
 function clearAllCodes() {
   if (!confirm('Clear all item codes? This cannot be undone.')) return;
   WOOD_CODES  = [];
@@ -916,11 +922,11 @@ function clearAllCodes() {
   document.getElementById('codes-import-note').textContent = 'Codes cleared.';
   document.getElementById('codes-import-note').style.color = 'var(--text3)';
 }
-
+ 
 // ── ORDER CSV IMPORT ──────────────────────────────────────────────────
 const DOUBLE_KEYWORDS = ['COLORADO','NEW YORK','MONTANA','BASKETWEAVE','BASKET WEAVE','DIAGONAL LATTICE','DIAG LAT','DIALAT','SQUARE LATTICE','SQ LATT','SQLATTICE','SQLAT','ARCHGATE','ARCH GATE'];
 const DOUBLE_PREFIXES = ['WCO','WNY','WMT','WDLG','WCOG','WNYG','WMTG','W1DL','W2DL','W4DL','W1SL','W2SL','W4SL','WBW','WSLG'];
-
+ 
 function fallbackDouble(code, desc) {
   const hay = (code + ' ' + desc).toUpperCase();
   if (DOUBLE_PREFIXES.some(p => code.toUpperCase().startsWith(p))) return true;
@@ -928,16 +934,16 @@ function fallbackDouble(code, desc) {
 }
 function fallbackIsGate(code) { return /[A-Z]G([0-9\-]|CUS)/i.test(code.toUpperCase()); }
 function hasTopper(code, desc) { return /\d+\+\d+/.test((code + ' ' + desc).toUpperCase()); }
-
+ 
 function parseCSV(text) {
   const SKIP_PRODS   = new Set([500,530,535,540,550,555,570]);
   const GATE_ONLY_P  = new Set([505,515,516]);
   const FENCE_ONLY_P = new Set([510,520]);
   const MIXED_P      = new Set([525]);
-
+ 
   const dayMap={}, dayItems={}, unknowns=[];
   const rows = text.trim().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-
+ 
   rows.forEach(function(rawLine) {
     const cols = parseCSVLine(rawLine);
     if (cols.length < 31) return;
@@ -949,16 +955,16 @@ function parseCSV(text) {
     const delivery = cols[26].trim();
     const so       = cols[27].trim().replace(/^0+/,'') || cols[27].trim();
     const customer = cols[30].trim();
-
+ 
     if (!prodStr || !/^\d+$/.test(prodStr)) return;
     if (!code || code==='ITEMCODE' || code==='ITEM CODE') return;
     if (!date || date.indexOf('/')<0) return;
-
+ 
     const prod = parseInt(prodStr);
     const qty  = parseInt(parseFloat(qtyStr));
     if (isNaN(qty) || qty<=0) return;
     if (SKIP_PRODS.has(prod)) return;
-
+ 
     let itype=null, mult=1;
     const lkp = WOOD_LOOKUP[code];
     if (lkp) {
@@ -974,7 +980,7 @@ function parseCSV(text) {
       if (code.indexOf('WGMOUNT')>=0) mult=fallbackDouble(code,desc)?4:2;
       if (desc.indexOf('RADIUS')>=0)  mult=6;
     }
-
+ 
     if (!itype) return;
     if (hasTopper(code,desc) && mult<2 && code.indexOf('WT')!==0) mult=2;
     if (code.indexOf('WGMOUNT')>=0) mult=fallbackDouble(code,desc)?4:2;
@@ -982,7 +988,7 @@ function parseCSV(text) {
       if (desc.indexOf(rule.kw.toUpperCase())>=0) mult=rule.mult;
     });
     if (desc.indexOf('RADIUS')>=0) mult=6;
-
+ 
     const count=qty*mult;
     if (!dayMap[date])   dayMap[date]={fence:0,gate:0};
     if (!dayItems[date]) dayItems[date]=[];
@@ -990,10 +996,10 @@ function parseCSV(text) {
     if (itype==='fence') dayMap[date].fence +=count;
     dayItems[date].push({code,desc,qty,mult,count,itype,delivery,so,customer});
   });
-
+ 
   return {dayMap,dayItems,unknowns};
 }
-
+ 
 function parseCSVLine(line) {
   const cols=[]; let cur='', inQuote=false;
   for (let i=0;i<line.length;i++) {
@@ -1004,7 +1010,7 @@ function parseCSVLine(line) {
   }
   cols.push(cur); return cols;
 }
-
+ 
 function handleCSV(event) {
   const file=event.target.files[0]; if (!file) return;
   const reader=new FileReader();
@@ -1047,7 +1053,7 @@ function handleCSV(event) {
   };
   reader.readAsText(file);
 }
-
+ 
 function showBanner(html,type) {
   const b=document.getElementById('csv-result-banner');
   b.style.display='block';
@@ -1055,7 +1061,7 @@ function showBanner(html,type) {
   b.style.color=type==='success'?'#2ecc71':type==='error'?'#e74c3c':'#f1c40f';
   b.innerHTML=html;
 }
-
+ 
 // ── UNKNOWNS MODAL ────────────────────────────────────────────────────
 function showUnknownsModal(unknowns) {
   const body=document.getElementById('unknowns-body');
@@ -1086,7 +1092,7 @@ function showUnknownsModal(unknowns) {
   }).join('');
   document.getElementById('unknowns-modal').classList.remove('hidden');
 }
-
+ 
 function setUnkType(i,type) {
   ['fence','gate','x2','skip'].forEach(t=>{
     const btn=document.getElementById(`unk-${t[0]}-${i}`);
@@ -1121,7 +1127,7 @@ function applyUnknowns() {
   pendingUnknowns=[];
   showBanner('✓ Unknown items applied.','success');
 }
-
+ 
 // ── DAY DETAIL PANEL ──────────────────────────────────────────────────
 function openDetail(i) {
   const e=entries[i], lbl=LABELS[mode], items=importedDayItems[e.date]||[];
@@ -1168,16 +1174,16 @@ function openDetail(i) {
   body.innerHTML=html;
 }
 function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); document.getElementById('detail-overlay').style.display='none'; }
-
+ 
 // ── CODE MANAGER ──────────────────────────────────────────────────────
 let codeFilter='all';
-
+ 
 function setCodeFilter(f) {
   codeFilter=f;
   ['all','type1','type2'].forEach(k=>document.getElementById('cf-'+k).classList.toggle('active',k===f));
   renderCodeTable();
 }
-
+ 
 function renderDescRules() {
   const el=document.getElementById('desc-rules-list');
   if (!DESC_RULES.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px 0;">No rules yet.</div>';return;}
@@ -1186,7 +1192,7 @@ function renderDescRules() {
     return '<div class="desc-rule-row"><span class="desc-rule-kw">'+r.kw+'</span><span class="desc-rule-mult">'+multLabel+'</span><button class="btn-del-rule2" onclick="deleteDescRule('+i+')">✕</button></div>';
   }).join('');
 }
-
+ 
 function addDescRule() {
   const kw=document.getElementById('new-rule-kw').value.trim().toUpperCase();
   const mult=parseFloat(document.getElementById('new-rule-mult').value);
@@ -1197,7 +1203,7 @@ function addDescRule() {
   renderDescRules(); saveToStorage(); showSavedToast();
 }
 function deleteDescRule(i) { DESC_RULES.splice(i,1); renderDescRules(); saveToStorage(); showSavedToast(); }
-
+ 
 function renderCodeTable() {
   const q=(document.getElementById('code-search').value||'').trim().toUpperCase();
   const body=document.getElementById('code-table-body');
@@ -1224,7 +1230,7 @@ function renderCodeTable() {
       +'</tr>';
   }).join('');
 }
-
+ 
 function updateCodeMult(code,sel) {
   const mult=parseFloat(sel.value);
   const entry=WOOD_CODES.find(r=>r.code===code);
@@ -1233,7 +1239,7 @@ function updateCodeMult(code,sel) {
   sel.classList.add('changed');
   saveToStorage(); showSavedToast();
 }
-
+ 
 function showAddCodeModal() {
   document.getElementById('add-code-modal').classList.remove('hidden');
   document.getElementById('new-code-code').value='';
@@ -1257,10 +1263,10 @@ function saveNewCode() {
   WOOD_CODES.sort((a,b)=>a.code.localeCompare(b.code));
   hideAddCodeModal(); renderCodeTable(); saveToStorage(); showSavedToast();
 }
-
+ 
 // ── HOLIDAYS ──────────────────────────────────────────────────────────
 function isHoliday(iso) { return HOLIDAYS.hasOwnProperty(iso); }
-
+ 
 function renderHolidays() {
   const list=document.getElementById('holiday-list');
   const keys=Object.keys(HOLIDAYS).sort();
@@ -1275,7 +1281,7 @@ function renderHolidays() {
       +'</div>';
   }).join('');
 }
-
+ 
 function addHoliday() {
   const dateVal=document.getElementById('holiday-date').value;
   const nameVal=document.getElementById('holiday-name').value.trim();
@@ -1287,7 +1293,7 @@ function addHoliday() {
   renderHolidays(); renderReport(); saveToStorage(); showSavedToast();
 }
 function deleteHoliday(iso) { delete HOLIDAYS[iso]; renderHolidays(); renderReport(); saveToStorage(); showSavedToast(); }
-
+ 
 // ── PERSISTENCE ───────────────────────────────────────────────────────
 function saveToStorage() {
   try {
@@ -1303,7 +1309,7 @@ function saveToStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch(e) { console.warn('Could not save:', e); }
 }
-
+ 
 function loadFromStorage() {
   try {
     const raw=localStorage.getItem(STORAGE_KEY); if (!raw) return;
@@ -1327,14 +1333,14 @@ function loadFromStorage() {
     }
   } catch(e) { console.warn('Could not load:', e); }
 }
-
+ 
 function exportSettings() {
   const data={version:1,exportedAt:new Date().toISOString(),configs,descRules:DESC_RULES,holidays:HOLIDAYS,codes:WOOD_CODES,mults:{}};
   WOOD_CODES.forEach(r=>{if(r.mult!==1)data.mults[r.code]=r.mult;});
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wood-report-settings.json'; a.click();
 }
-
+ 
 function importSettings() {
   const inp=document.createElement('input'); inp.type='file'; inp.accept='.json';
   inp.onchange=function(e){
@@ -1365,7 +1371,7 @@ function importSettings() {
   };
   inp.click();
 }
-
+ 
 // ── TOAST ─────────────────────────────────────────────────────────────
 let _toastTimer=null;
 function showSavedToast() {
@@ -1373,7 +1379,7 @@ function showSavedToast() {
   t.style.opacity='1'; clearTimeout(_toastTimer);
   _toastTimer=setTimeout(()=>{t.style.opacity='0';},1800);
 }
-
+ 
 // ── CLEAR ALL ─────────────────────────────────────────────────────────
 function clearAll() {
   if (!confirm('Clear all entries? This cannot be undone.')) return;
@@ -1381,19 +1387,19 @@ function clearAll() {
   renderList(); renderReport(); saveToStorage();
   showBanner('✓ All entries cleared.','success');
 }
-
+ 
 // ── SHARED REPORT ─────────────────────────────────────────────────────
 function generateSharedReport() {
   if (!entries.length){alert('Add at least one entry first.');return;}
   const now=new Date();
   const printedStr=now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})+' '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
-
+ 
   function gStatus(val,max){const p=(val/max)*100;if(p<=40)return{label:'Light',color:'#27ae60'};if(p<=70)return{label:'Moderate',color:'#f39c12'};if(p<100)return{label:'Heavy',color:'#e67e22'};if(p<=110)return{label:'Full',color:'#e74c3c'};return{label:'Super Full !!',color:'#e74c3c'};}
   function fmtL(dateStr){const p=dateStr.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]);const days=['Sun.','Mon.','Tue.','Wed.','Thu.','Fri.','Sat.'];const dp=d.toLocaleDateString('en-US',{day:'numeric',month:'short'}).replace(' ','-').toUpperCase();return days[d.getDay()]+' '+dp;}
   function dGroup(d){if(!d)return'OUR TRUCK';if(d.indexOf('PICK')>=0)return'PICK UP';if(d.indexOf('INSTALL')>=0)return'INSTALL/REPAIR';return'OUR TRUCK';}
   function dStyle(d){if(d.indexOf('PICK')>=0)return'background:rgba(241,196,15,.15);color:#f1c40f';if(d.indexOf('INSTALL')>=0)return'background:rgba(155,89,182,.15);color:#a855f7';return'background:rgba(52,152,219,.15);color:#3498db';}
   function dIcon(d){if(d.indexOf('PICK')>=0)return'&#128230;';if(d.indexOf('INSTALL')>=0)return'&#128295;';return'&#128666;';}
-
+ 
   // Build detail HTML for each entry
   function buildDetailHTML(e) {
     var items = importedDayItems[e.date] || [];
@@ -1426,9 +1432,9 @@ function generateSharedReport() {
     }
     return buildSec(fences,'#2ecc71','Fence')+buildSec(gates,'#e91e8c','Gate');
   }
-
+ 
   var allItems=buildAllItems();
-
+ 
   var css='*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"DM Sans",Arial,sans-serif;background:#0f1117;color:#f0f2f8;min-height:100vh;}'
     +'.page{max-width:1300px;margin:0 auto;padding:1.5rem;}'
     +'.header{text-align:center;padding:1.25rem 2rem;background:linear-gradient(135deg,#0d2b1a,#1a3d2a);border-radius:16px;margin-bottom:1.25rem;border:2px solid #2ecc71;position:relative;}'
@@ -1455,7 +1461,7 @@ function generateSharedReport() {
     +'.tot-card{flex:1;background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}'
     +'.tot-lbl{font-size:11px;color:#8b92a8;text-transform:uppercase;letter-spacing:.5px;}'
     +'.tot-val{font-size:18px;font-weight:900;font-family:monospace;}';
-
+ 
   // Build card data map: id -> {detail, fence, gate, date} so clicks always find the right data
   var cardDataMap={};
   var grid='';
@@ -1473,9 +1479,9 @@ function generateSharedReport() {
       grid+='<div class="day-card" id="card-'+id+'" onclick="showDetail('+id+')"><div class="day-hdr"><span>'+fmtL(e.date)+'</span><span style="font-size:11px;color:#2ecc71;opacity:.7;">&#9654;</span></div><div class="stats"><div class="stat"><div class="stat-lbl">FENCE</div><div class="stat-val" style="color:'+fs.color+';">'+e.fence+'</div><div class="stat-sub" style="color:'+fs.color+';">'+fs.label+'</div></div><div class="stat"><div class="stat-lbl">GATE</div><div class="stat-val" style="color:'+gs.color+';">'+e.gate+'</div><div class="stat-sub" style="color:'+gs.color+';">'+gs.label+'</div></div></div></div>';
     }
   });
-
+ 
   var cmJSON=JSON.stringify(cardDataMap).replace(/</g,'\u003c').replace(/>/g,'\u003e');
-
+ 
   var detailPanel='<div class="detail-panel" id="detail-panel">'
     +'<div class="empty-msg" id="det-empty">&#128072; Click a day card to see its details</div>'
     +'<div id="det-content" style="display:none;">'
@@ -1484,7 +1490,7 @@ function generateSharedReport() {
     +'<div class="tot-row" id="det-totals"></div>'
     +'<div id="det-body"></div>'
     +'</div></div>';
-
+ 
   var toggleScript='var CM='+cmJSON+';'
     +'function fmtL(ds){var p=ds.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);var days=["Sun.","Mon.","Tue.","Wed.","Thu.","Fri.","Sat."];var dp=d.toLocaleDateString("en-US",{day:"numeric",month:"short"}).replace(" ","-").toUpperCase();return days[d.getDay()]+" "+dp;}'
     +'function showDetail(id){'
@@ -1499,7 +1505,7 @@ function generateSharedReport() {
     +'document.getElementById("det-totals").innerHTML="<div class=\'tot-card\'><span class=\'tot-lbl\'>Fence</span><span class=\'tot-val\' style=\'color:#2ecc71;\'>"+data.fence+"</span></div><div class=\'tot-card\'><span class=\'tot-lbl\'>Gate</span><span class=\'tot-val\' style=\'color:#e91e8c;\'>"+data.gate+"</span></div>";'
     +'document.getElementById("det-body").innerHTML=data.detail||"<p style=\'color:#555d75;font-size:13px;\'>No import data for this day.</p>";'
     +'}';
-
+ 
   var dateStr=now.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'2-digit'}).replace(/\//g,'-');
   var fullHTML='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>'
     +'<meta name="viewport" content="width=device-width,initial-scale=1.0"/>'
@@ -1514,11 +1520,11 @@ function generateSharedReport() {
     +'<\/div>'
     +'<scr'+'ipt>'+toggleScript+'<\/scr'+'ipt>'
     +'<\/body><\/html>';
-
+ 
   var blob=new Blob([fullHTML],{type:'text/html'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wood-report-'+dateStr+'.html'; a.click(); URL.revokeObjectURL(a.href);
 }
-
+ 
 // ── INIT ──────────────────────────────────────────────────────────────
 (function init() {
   loadFromStorage();

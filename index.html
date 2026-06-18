@@ -942,7 +942,21 @@ function parseCSV(text) {
   const MIXED_P      = new Set([525]);
  
   const dayMap={}, dayItems={}, unknowns=[];
-  const rows = text.trim().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  // Rejoin physical lines that were split inside a quoted field (e.g. multi-line descriptions)
+  const _physRows = text.trim().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const rows = [];
+  let _buf = '';
+  for (let _i = 0; _i < _physRows.length; _i++) {
+    _buf = _buf ? _buf + ' ' + _physRows[_i] : _physRows[_i];
+    let _qc = 0;
+    for (let _j = 0; _j < _buf.length; _j++) {
+      if (_buf[_j] === '"') {
+        if (_buf[_j+1] === '"') { _j++; } else { _qc++; }
+      }
+    }
+    if (_qc % 2 === 0) { rows.push(_buf); _buf = ''; }
+  }
+  if (_buf) rows.push(_buf);
  
   rows.forEach(function(rawLine) {
     const cols = parseCSVLine(rawLine);

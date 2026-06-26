@@ -241,7 +241,7 @@
   <div class="panel active" id="panel-entry">
     <div class="section-heading">
       <h2>Daily Entry</h2>
-      <p>Add up to 15 working days</p>
+      <p>Add up to 28 days</p>
     </div>
     <div class="max-row" id="maxes-display"></div>
     <div class="input-card">
@@ -647,7 +647,7 @@ function switchManageTab(tab) {
  
 // ── ENTRIES ───────────────────────────────────────────────────────────
 function addEntry() {
-  if (entries.length >= 15) { alert('Maximum 15 days reached.'); return; }
+  if (entries.length >= 28) { alert('Maximum 28 days reached.'); return; }
   const date  = document.getElementById('inp-date').value;
   const fence = parseInt(document.getElementById('inp-fence').value);
   const gate  = parseInt(document.getElementById('inp-gate').value);
@@ -1034,7 +1034,7 @@ function handleCSV(event) {
       const dates=Object.keys(dayMap).sort((a,b)=>new Date(a)-new Date(b));
       let added=0,skipped=0;
       dates.forEach(date=>{
-        if (entries.length>=15){skipped++;return;}
+        if (entries.length>=28){skipped++;return;}
         const d=new Date(date); if (isNaN(d)) return;
         while (d.getDay()===0||d.getDay()===6) d.setDate(d.getDate()+1);
         const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -1129,7 +1129,7 @@ function applyUnknowns() {
       const d=new Date(u.date); if (isNaN(d)) return;
       const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       let entry=entries.find(en=>en.date===iso);
-      if (!entry){if(entries.length>=15)return;entry={date:iso,fence:0,gate:0};entries.push(entry);}
+      if (!entry){if(entries.length>=28)return;entry={date:iso,fence:0,gate:0};entries.push(entry);}
       const count=u.qty*mult;
       if (finalType==='gate')  entry.gate  +=count;
       if (finalType==='fence') entry.fence +=count;

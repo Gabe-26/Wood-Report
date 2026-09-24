@@ -32,7 +32,7 @@
   .htab:hover { background: var(--bg3); color: var(--text); }
   .htab.active { background: var(--mode-accent); color: #0f1117; }
   .app-body { flex: 1; }
-  .main { flex: 1; padding: 2rem 2rem 4rem; max-width: 900px; margin: 0 auto; width: 100%; }
+  .main { flex: 1; padding: 2rem 2rem 4rem; max-width: 1100px; margin: 0 auto; width: 100%; }
   .panel { display: none; }
   .panel.active { display: block; }
   .section-heading { display: flex; align-items: baseline; gap: 10px; margin-bottom: 1.5rem; }
@@ -884,8 +884,14 @@ function handleCodesCSV(event) {
       const lines = e.target.result.trim().replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
       if (lines.length < 2) { alert('CSV appears empty.'); return; }
  
-      // Parse header — flexible column name matching
-      const header = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+      // Find the header row — some exports (e.g. "MATERIAL COST" reports) have a title
+      // line or two before the real column header, so scan the first several lines
+      // instead of assuming line 0 is the header.
+      let headerIdx = -1, header = [];
+      for (let i = 0; i < Math.min(10, lines.length); i++) {
+        const h = parseCSVLine(lines[i]).map(c => c.trim().toLowerCase());
+        if (h.some(c => c === 'item code' || c === 'code' || c === 'itemcode')) { headerIdx = i; header = h; break; }
+      }
  
       // Support "item code", "code", "itemcode"
       let colCode = header.findIndex(h => h === 'item code' || h === 'code' || h === 'itemcode');
@@ -901,7 +907,7 @@ function handleCodesCSV(event) {
       WOOD_LOOKUP = {};
  
       let count = 0, skipped = 0;
-      lines.slice(1).forEach(function(line) {
+      lines.slice(headerIdx+1).forEach(function(line) {
         if (!line.trim()) return;
         const cols = parseCSVLine(line);
         if (cols.length < 1) return;

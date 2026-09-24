@@ -170,6 +170,20 @@
   .filter-btn.active { background:var(--mode-accent); color:#0f1117; border-color:var(--mode-accent); }
   .filter-btn:hover:not(.active) { border-color:var(--mode-accent); color:var(--mode-accent); }
   .code-stats { font-size:12px; color:var(--text3); }
+  .code-filter-select { height:36px; padding:0 10px; background:var(--bg3); border:1px solid var(--border2); border-radius:8px; color:var(--text); font-size:13px; cursor:pointer; outline:none; }
+  .code-filter-select:focus { border-color:var(--mode-accent); }
+  .bulk-bar { display:flex; justify-content:space-between; align-items:center; background:var(--bg2); border:1px solid var(--border2); border-radius:10px; padding:8px 14px; margin-bottom:10px; flex-wrap:wrap; gap:10px; }
+  .bulk-bar-left { display:flex; align-items:center; gap:10px; }
+  .bulk-bar-left input[type=checkbox] { width:16px; height:16px; cursor:pointer; }
+  .bulk-count { font-size:12px; color:var(--text2); }
+  .bulk-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .bulk-actions-label { font-size:12px; color:var(--text3); }
+  .type-btn { height:28px; padding:0 10px; border-radius:6px; border:1px solid var(--border2); background:none; color:var(--text2); font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all .2s; white-space:nowrap; }
+  .type-btn:hover { color:var(--text); border-color:var(--text2); }
+  .type-btn.active.f { background:rgba(46,204,113,.2); border-color:#2ecc71; color:#2ecc71; }
+  .type-btn.active.g { background:rgba(233,30,140,.2); border-color:#e91e8c; color:#e91e8c; }
+  .type-btn.active.p { background:rgba(149,165,166,.2); border-color:#95a5a6; color:#95a5a6; }
+  .code-row-cb { width:16px; height:16px; cursor:pointer; }
   .code-table-wrap { max-height:420px; overflow-y:auto; border:1px solid var(--border2); border-radius:12px; }
   .code-table-wrap::-webkit-scrollbar { width:4px; }
   .code-table-wrap::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
@@ -402,27 +416,44 @@
  
         <!-- Code search + list -->
         <div>
-          <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Item Codes <span class="code-stats" id="code-stats"></span></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Item Codes</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
             <div class="code-mgr-search" style="flex:1;">
               <input id="code-search" placeholder="Search code or description..." oninput="renderCodeTable()" />
-              <div class="code-mgr-filters">
-                <button class="filter-btn active" id="cf-all"   onclick="setCodeFilter('all')">All</button>
-                <button class="filter-btn"        id="cf-type1" onclick="setCodeFilter('type1')">Fence</button>
-                <button class="filter-btn"        id="cf-type2" onclick="setCodeFilter('type2')">Gate</button>
-                <button class="filter-btn"        id="cf-type3" onclick="setCodeFilter('type3')">Post</button>
-              </div>
+              <select class="code-filter-select" id="code-type-filter" onchange="renderCodeTable()">
+                <option value="all">All codes</option>
+                <option value="f">Fence</option>
+                <option value="g">Gate</option>
+                <option value="p">Post</option>
+                <option value="unclassified">Unclassified</option>
+              </select>
+              <select class="code-filter-select" id="code-prod-filter" onchange="renderCodeTable()">
+                <option value="all">All Prod lines</option>
+              </select>
             </div>
+            <span class="code-stats" id="code-stats"></span>
             <button class="btn-primary" style="height:36px;padding:0 16px;font-size:13px;white-space:nowrap;" onclick="showAddCodeModal()">+ Add Code</button>
+          </div>
+          <div class="bulk-bar">
+            <div class="bulk-bar-left">
+              <input type="checkbox" id="code-select-all" onchange="toggleSelectAllCodes(this)"/>
+              <span class="bulk-count" id="bulk-count">0 selected</span>
+            </div>
+            <div class="bulk-actions">
+              <span class="bulk-actions-label">Set selected to:</span>
+              <button class="type-btn" onclick="bulkSetCodeType('f')">Fence</button>
+              <button class="type-btn" onclick="bulkSetCodeType('g')">Gate</button>
+              <button class="type-btn" onclick="bulkSetCodeType('p')">Post</button>
+            </div>
           </div>
           <div class="code-table-wrap">
             <table class="code-table">
-              <thead><tr><th>Code</th><th>Description</th><th>Prod</th><th>Type</th><th>Multiplier</th></tr></thead>
+              <thead><tr><th style="width:30px;"></th><th>Code</th><th>Description</th><th>Prod</th><th>Type</th><th>Multiplier</th></tr></thead>
               <tbody id="code-table-body"></tbody>
             </table>
           </div>
         </div>
- 
+
       </div>
     </div><!-- end manage-panel-codes -->
  
@@ -854,12 +885,11 @@ function toggleReport() {
 // Fence-only prods: 510, 520
 // Mixed prod 525: use code pattern to decide
 // Post prods: 530, 535, 560, 565
-// Skip prods: 500, 540, 550, 555, 570
+// Everything else (lumber, rails, arbors, unknown prods, etc.) imports as Unclassified for manual review
 const CODES_GATE_ONLY  = new Set([505, 515, 516]);
 const CODES_FENCE_ONLY = new Set([510, 520]);
 const CODES_MIXED      = new Set([525]);
 const CODES_POST       = new Set([530, 535, 560, 565]);
-const CODES_SKIP       = new Set([500, 540, 550, 555, 570]);
  
 // Auto-detect multiplier from code/description
 function autoMult(code, desc) {
@@ -905,8 +935,9 @@ function handleCodesCSV(event) {
       // Reset
       WOOD_CODES  = [];
       WOOD_LOOKUP = {};
+      selectedCodes.clear(); lastClickedCodeIdx = null;
  
-      let count = 0, skipped = 0;
+      let count = 0, unclassified = 0;
       lines.slice(headerIdx+1).forEach(function(line) {
         if (!line.trim()) return;
         const cols = parseCSVLine(line);
@@ -918,15 +949,12 @@ function handleCodesCSV(event) {
         const desc = colDesc >= 0 ? (cols[colDesc]||'').trim().toUpperCase() : '';
         const prodRaw = colProd >= 0 ? parseInt(cols[colProd]) || 0 : 0;
  
-        // Skip non-fence/gate prod lines
-        if (CODES_SKIP.has(prodRaw)) { skipped++; return; }
- 
-        // Determine type
+        // Determine type — null means "not yet classified", shown in the table for manual review
         let type;
         if (colType >= 0) {
           // If CSV has a Type column, use it
           const typeRaw = (cols[colType]||'').trim().toLowerCase();
-          type = (typeRaw === 'gate' || typeRaw === 'g') ? 'g' : (typeRaw === 'post' || typeRaw === 'p') ? 'p' : 'f';
+          type = (typeRaw === 'gate' || typeRaw === 'g') ? 'g' : (typeRaw === 'post' || typeRaw === 'p') ? 'p' : (typeRaw === 'fence' || typeRaw === 'f') ? 'f' : null;
         } else if (CODES_POST.has(prodRaw)) {
           type = 'p';
         } else if (CODES_GATE_ONLY.has(prodRaw)) {
@@ -940,15 +968,16 @@ function handleCodesCSV(event) {
           // No prod info — guess from code pattern
           type = /[A-Z]G([0-9]|CUS)/i.test(code) ? 'g' : 'f';
         } else {
-          // Unknown prod — skip
-          skipped++; return;
+          // Unknown/skip-list prod (lumber, rails, arbors, etc.) — leave for manual classification
+          type = null;
         }
+        if (!type) unclassified++;
  
         // Determine multiplier
         const mult = colMult >= 0 ? (parseFloat(cols[colMult]) || 1) : autoMult(code, desc);
  
         WOOD_CODES.push({ code, type, mult, desc, prod: prodRaw });
-        WOOD_LOOKUP[code] = [type, mult];
+        if (type) WOOD_LOOKUP[code] = [type, mult];
         count++;
       });
  
@@ -957,7 +986,7 @@ function handleCodesCSV(event) {
       saveToStorage();
       renderCodeTable();
       const note = document.getElementById('codes-import-note');
-      note.textContent = '✓ ' + count + ' codes loaded' + (skipped ? ' (' + skipped + ' non-fence/gate skipped)' : '');
+      note.textContent = '✓ ' + count + ' codes loaded' + (unclassified ? ' (' + unclassified + ' need classification)' : '');
       note.style.color = 'var(--accent)';
     } catch(err) {
       alert('Could not read codes CSV: ' + err.message);
@@ -971,6 +1000,7 @@ function clearAllCodes() {
   if (!confirm('Clear all item codes? This cannot be undone.')) return;
   WOOD_CODES  = [];
   WOOD_LOOKUP = {};
+  selectedCodes.clear(); lastClickedCodeIdx = null;
   saveToStorage();
   renderCodeTable();
   document.getElementById('codes-import-note').textContent = 'Codes cleared.';
@@ -1257,12 +1287,105 @@ function openDetail(i) {
 function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); document.getElementById('detail-overlay').style.display='none'; }
  
 // ── CODE MANAGER ──────────────────────────────────────────────────────
-let codeFilter='all';
- 
-function setCodeFilter(f) {
-  codeFilter=f;
-  ['all','type1','type2','type3'].forEach(k=>document.getElementById('cf-'+k).classList.toggle('active',k===f));
+let selectedCodes = new Set();
+let lastClickedCodeIdx = null;
+let _filteredCodesCache = [];
+let _prodFilterOptionsKey = null;
+
+function populateProdFilterOptions() {
+  const sel = document.getElementById('code-prod-filter');
+  const prev = sel.value || 'all';
+  const prods = Array.from(new Set(WOOD_CODES.map(r => r.prod || 0))).sort((a,b) => a-b);
+  const key = prods.join(',');
+  if (_prodFilterOptionsKey === key) return; // unchanged — skip rebuild so selection/focus isn't reset
+  _prodFilterOptionsKey = key;
+  sel.innerHTML = '<option value="all">All Prod lines</option>'
+    + prods.map(p => '<option value="'+p+'">'+String(p).padStart(4,'0')+'</option>').join('');
+  if (prev === 'all' || prods.some(p => String(p) === prev)) sel.value = prev;
+}
+
+function renderCodeTable() {
+  populateProdFilterOptions();
+  const q = (document.getElementById('code-search').value||'').trim().toUpperCase();
+  const typeFilter = document.getElementById('code-type-filter').value;
+  const prodFilter = document.getElementById('code-prod-filter').value;
+  const body = document.getElementById('code-table-body');
+  let filtered = WOOD_CODES.filter(r => {
+    if (typeFilter==='unclassified' && r.type) return false;
+    if (typeFilter!=='all' && typeFilter!=='unclassified' && r.type!==typeFilter) return false;
+    if (prodFilter!=='all' && String(r.prod||0)!==prodFilter) return false;
+    if (q && r.code.indexOf(q)<0 && (r.desc||'').toUpperCase().indexOf(q)<0) return false;
+    return true;
+  });
+  _filteredCodesCache = filtered;
+  document.getElementById('code-stats').textContent = filtered.length+' of '+WOOD_CODES.length+' codes';
+  if (!filtered.length) {
+    body.innerHTML = WOOD_CODES.length===0
+      ? '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:2rem;">No codes loaded yet. Import a Codes CSV above.</td></tr>'
+      : '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:1.5rem;">No codes match your filters.</td></tr>';
+  } else {
+    body.innerHTML = filtered.map(function(r,i) {
+      const opts=[1,1.5,2,3,4,6,8,10].map(v=>'<option value="'+v+'"'+(r.mult===v?' selected':'')+'">×'+v+'</option>').join('');
+      const checked = selectedCodes.has(r.code) ? ' checked' : '';
+      function tBtn(t,label){ return '<button class="type-btn'+(r.type===t?' active '+t:'')+'" onclick="setCodeType(\''+r.code+'\',\''+t+'\')">'+label+'</button>'; }
+      return '<tr>'
+        +'<td><input type="checkbox" class="code-row-cb"'+checked+' onclick="handleCodeCheckboxClick(event,'+i+')"/></td>'
+        +'<td class="code-td-code">'+r.code+'</td>'
+        +'<td style="font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(r.desc||'')+'">'+(r.desc||'—')+'</td>'
+        +'<td style="font-size:12px;color:var(--text3);font-family:monospace;">'+(r.prod?String(r.prod).padStart(4,'0'):'—')+'</td>'
+        +'<td><div style="display:flex;gap:4px;flex-wrap:wrap;">'+tBtn('f','Fence')+tBtn('g','Gate')+tBtn('p','Post')+'</div></td>'
+        +'<td><select class="mult-select" onchange="updateCodeMult(\''+r.code+'\',this)">'+opts+'</select></td>'
+        +'</tr>';
+    }).join('');
+  }
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const visibleCodes = _filteredCodesCache.map(function(r){ return r.code; });
+  const selectedVisible = visibleCodes.filter(function(c){ return selectedCodes.has(c); });
+  document.getElementById('bulk-count').textContent = selectedCodes.size+' selected';
+  const master = document.getElementById('code-select-all');
+  master.checked = visibleCodes.length>0 && selectedVisible.length===visibleCodes.length;
+  master.indeterminate = selectedVisible.length>0 && selectedVisible.length<visibleCodes.length;
+}
+
+function handleCodeCheckboxClick(evt, idx) {
+  const code = _filteredCodesCache[idx].code;
+  if (evt.shiftKey && lastClickedCodeIdx !== null) {
+    const lo = Math.min(lastClickedCodeIdx, idx), hi = Math.max(lastClickedCodeIdx, idx);
+    for (let i=lo; i<=hi; i++) selectedCodes.add(_filteredCodesCache[i].code);
+  } else {
+    if (selectedCodes.has(code)) selectedCodes.delete(code); else selectedCodes.add(code);
+  }
+  lastClickedCodeIdx = idx;
   renderCodeTable();
+}
+
+function toggleSelectAllCodes(cb) {
+  _filteredCodesCache.forEach(function(r) {
+    if (cb.checked) selectedCodes.add(r.code); else selectedCodes.delete(r.code);
+  });
+  renderCodeTable();
+}
+
+function setCodeType(code, type) {
+  const entry = WOOD_CODES.find(function(r){ return r.code===code; });
+  if (!entry) return;
+  entry.type = (entry.type===type) ? null : type;
+  if (entry.type) WOOD_LOOKUP[code]=[entry.type, entry.mult]; else delete WOOD_LOOKUP[code];
+  saveToStorage(); renderCodeTable(); showSavedToast();
+}
+
+function bulkSetCodeType(type) {
+  if (!selectedCodes.size) return;
+  selectedCodes.forEach(function(code) {
+    const entry = WOOD_CODES.find(function(r){ return r.code===code; });
+    if (!entry) return;
+    entry.type = type;
+    WOOD_LOOKUP[code]=[type, entry.mult];
+  });
+  saveToStorage(); renderCodeTable(); showSavedToast();
 }
  
 function renderDescRules() {
@@ -1284,34 +1407,6 @@ function addDescRule() {
   renderDescRules(); saveToStorage(); showSavedToast();
 }
 function deleteDescRule(i) { DESC_RULES.splice(i,1); renderDescRules(); saveToStorage(); showSavedToast(); }
- 
-function renderCodeTable() {
-  const q=(document.getElementById('code-search').value||'').trim().toUpperCase();
-  const body=document.getElementById('code-table-body');
-  let filtered=WOOD_CODES.filter(r=>{
-    if (codeFilter==='type1'&&r.type!=='f') return false;
-    if (codeFilter==='type2'&&r.type!=='g') return false;
-    if (codeFilter==='type3'&&r.type!=='p') return false;
-    if (q&&r.code.indexOf(q)<0&&(r.desc||'').toUpperCase().indexOf(q)<0) return false;
-    return true;
-  });
-  document.getElementById('code-stats').textContent='— '+filtered.length+' of '+WOOD_CODES.length;
-  if (!filtered.length) {
-    body.innerHTML=WOOD_CODES.length===0
-      ?'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:2rem;">No codes loaded yet. Import a Codes CSV above.</td></tr>'
-      :'<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:1.5rem;">No codes match your search.</td></tr>';
-    return;
-  }
-  body.innerHTML=filtered.map(r=>{
-    const opts=[1,1.5,2,3,4,6,8,10].map(v=>'<option value="'+v+'"'+(r.mult===v?' selected':'')+'">×'+v+'</option>').join('');
-    return '<tr><td class="code-td-code">'+r.code+'</td>'
-      +'<td style="font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+(r.desc||'')+'">'+( r.desc||'—')+'</td>'
-      +'<td style="font-size:12px;color:var(--text3);font-family:monospace;">'+(r.prod||'—')+'</td>'
-      +'<td><span class="type-badge '+r.type+'">'+(r.type==='f'?'Fence':r.type==='g'?'Gate':'Post')+'</span></td>'
-      +'<td><select class="mult-select" onchange="updateCodeMult(\''+r.code+'\',this)">'+opts+'</select></td>'
-      +'</tr>';
-  }).join('');
-}
  
 function updateCodeMult(code,sel) {
   const mult=parseFloat(sel.value);
@@ -1404,7 +1499,7 @@ function loadFromStorage() {
     if (data.codes && data.codes.length) {
       WOOD_CODES  = data.codes;
       WOOD_LOOKUP = {};
-      WOOD_CODES.forEach(r=>{ WOOD_LOOKUP[r.code]=[r.type, r.mult]; });
+      WOOD_CODES.forEach(r=>{ if (r.type) WOOD_LOOKUP[r.code]=[r.type, r.mult]; });
     }
     if (data.mults) {
       Object.keys(data.mults).forEach(code=>{
@@ -1436,7 +1531,7 @@ function importSettings() {
         if (data.holidays)  HOLIDAYS   = data.holidays;
         if (data.codes && data.codes.length) {
           WOOD_CODES=data.codes; WOOD_LOOKUP={};
-          WOOD_CODES.forEach(r=>{WOOD_LOOKUP[r.code]=[r.type,r.mult];});
+          WOOD_CODES.forEach(r=>{if(r.type)WOOD_LOOKUP[r.code]=[r.type,r.mult];});
         }
         if (data.mults) {
           Object.keys(data.mults).forEach(code=>{
